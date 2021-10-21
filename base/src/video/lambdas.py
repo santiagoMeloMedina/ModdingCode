@@ -1,3 +1,11 @@
-from src.stacks import VideoStack
+from src import stacks, lambdas
 
-from aws_cdk import aws_lambda as _lambda
+
+class SaveVideoLambdas(lambdas.LocalLambda):
+    def __init__(self):
+        super().__init__(
+            scope=stacks.VideoStack,
+            id="SaveVideoLambdas",
+            source="src/hey",
+            env={"hello": "hi"},
+        )

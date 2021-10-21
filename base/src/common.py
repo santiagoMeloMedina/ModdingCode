@@ -1,11 +1,12 @@
+import os
 import pydash
 from pydantic import BaseSettings
 from aws_cdk import core
 
 
 class _Settings(BaseSettings):
-    aws_region: str = "us-east-1"
-    aws_account: str = "123324324"
+    aws_region: str
+    aws_account: str
 
 
 class Singletons:
@@ -22,8 +23,6 @@ class Singletons:
         print(self.__instances, sep="\n")
 
 
-SINGLETONS = Singletons()
-
 _SETTINGS = _Settings()
 
 ENVIRONMENT = core.Environment(
@@ -31,3 +30,7 @@ ENVIRONMENT = core.Environment(
 )
 
 app = core.App()
+
+BASE_PROJECT_FOLDER_PATH_STR = os.path.dirname(os.path.dirname(__file__))
+GENERAL_PROJECTS_FOLDER_PATH_STR = os.path.dirname(BASE_PROJECT_FOLDER_PATH_STR)
+LOGIC_PROJECT_FOLDER_PATH_STR = "/".join([GENERAL_PROJECTS_FOLDER_PATH_STR, "logic"])

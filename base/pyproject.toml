@@ -10,10 +10,10 @@ mypy = "^0.910"
 pylint = "^2.11.1"
 black = "^21.9b0"
 pydantic = "^1.8.2"
-injector = "^0.18.4"
 "aws-cdk.core" = "1.119.0"
 "aws-cdk.aws-dynamodb" = "1.119.0"
 pydash = "^5.1.0"
+injectable = "^3.4.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

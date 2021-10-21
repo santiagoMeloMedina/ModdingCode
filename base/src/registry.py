@@ -1,1 +1,1 @@
-from src.video import storage
+from src.video import storage, lambdas

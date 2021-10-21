@@ -5,7 +5,7 @@ from aws_cdk import core, aws_dynamodb as _dynamodb
 class Table(_dynamodb.Table):
     def __init__(
         self,
-        scope: core.Construct,
+        scope: core.Stack,
         id: str,
         name: str,
         partition_key: _dynamodb.Attribute,
