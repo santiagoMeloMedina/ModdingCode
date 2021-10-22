@@ -1,5 +1,6 @@
 from aws_cdk import core
 from src import common
+from singleton_injector import injector
 
 
 class Stack(core.Stack):
@@ -9,6 +10,7 @@ class Stack(core.Stack):
         )
 
 
+@injector
 class VideoStack(Stack):
     def __init__(self):
         super().__init__(id="VideoStack", name="VideoStack")
