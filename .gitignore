@@ -2,3 +2,5 @@ __pycache__
 .pytest_cache
 .mypy_cache
 node_modules
+cdk.out
+yarn-error.log
