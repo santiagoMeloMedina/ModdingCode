@@ -12,4 +12,15 @@ class LocalLambda(_lambda.Function):
             handler=".".join([source, "handler"]),
             runtime=_lambda.Runtime.PYTHON_3_8,
             environment=env,
+            layers=[LocalLayer(scope=scope, id="%s_LocalLayer" % (id))],
+        )
+
+
+class LocalLayer(_lambda.LayerVersion):
+    def __init__(self, scope: Any, id: str):
+        super().__init__(
+            scope=scope,
+            id=id,
+            code=_lambda.Code.from_asset(common.LOGIC_PROJECT_FOLDER_ASSETS_PATH_STR),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_8],
         )

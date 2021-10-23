@@ -6,6 +6,10 @@ authors = ["BuildTools <unconfigured@null.spigotmc.org>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+boto3 = "^1.19.1"
+black = "^21.9b0"
+pydantic = "^1.8.2"
+pydash = "^5.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
