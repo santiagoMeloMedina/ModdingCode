@@ -4,3 +4,7 @@ __pycache__
 node_modules
 cdk.out
 yarn-error.log
+.libs
+.requirements.txt
+.libs.zip
+.env
