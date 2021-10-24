@@ -1,5 +1,5 @@
 import argparse
-from os import name
+import os
 from subprocess import check_call, DEVNULL, STDOUT, check_output
 
 
@@ -18,18 +18,22 @@ class Interface:
             self.commands[args.command]()
 
     def store_dependencies(self):
-        parent_folder = "../assets"
-        temp_filename = f"{parent_folder}/.tmp_requirements.txt"
-        tmp = check_output(args=["poetry export"], shell=True)
-        temp_file = open(temp_filename, "w")
-        temp_file.write(tmp.decode("utf-8"))
-        temp_file.close()
-        check_call(
-            args=[
-                f"pip3 install -r {temp_filename} -t {parent_folder}/.tmp_libraries",
-            ],
-            shell=True,
-        )
+        logic_path = os.path.dirname(os.path.abspath("."))
+        parent_folder = "%s/%s" % (logic_path, "assets")
+        reqspath = f"{parent_folder}/.requirements.txt"
+        packagespath = "python/lib/python3.8/site-packages"
+        libspath = f"{parent_folder}/{packagespath}"
+        libs_file = ".libs.zip"
+        os.chdir(parent_folder)
+        commands = [
+            f"poetry export > {reqspath}",
+            f"pip3 install -r {reqspath} -t {libspath}",
+            f"zip -r {libs_file} {packagespath}",
+            f"rm -r {libspath}",
+            f"rm {reqspath}",
+        ]
+        for command in commands:
+            check_call(args=[command], shell=True)
 
 
 Interface().run()

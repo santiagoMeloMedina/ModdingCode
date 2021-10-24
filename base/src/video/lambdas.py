@@ -13,7 +13,7 @@ class CreateVideoLambda(lambdas.LocalLambda):
         super().__init__(
             scope=scope,
             id="CreateVideoLambda",
-            source="src/video/create_video",
+            source="modding/video/create_video",
             env={"VIDEO_BUCKET_NAME": video_bucket.bucket_name},
         )
 

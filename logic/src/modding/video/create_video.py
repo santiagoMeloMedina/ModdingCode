@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from src.common import logging, aws_cli, settings
+from modding.common import logging, aws_cli, settings
 
 
 class _Settings(settings.Settings):
