@@ -1,24 +1,28 @@
 import argparse
 import os
-from subprocess import check_call, DEVNULL, STDOUT, check_output
+from subprocess import check_call
+from typing import Callable
 
 
 class Interface:
-    def __init__(self):
+    def __init__(self, folder: str):
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument("--command", type=str, default=None, required=False)
-        self.__set_commands()
-
-    def __set_commands(self):
+        self.folder = os.path.abspath(os.path.dirname(__file__))
         self.commands = {"libraries": self.store_dependencies}
+
+    def add_command(self, name: str, _method: Callable):
+        self.commands[name] = _method
 
     def run(self):
         args = self.parser.parse_args()
         if args.command in self.commands:
             self.commands[args.command]()
+        else:
+            print(f"'{args.command}' is not a known command")
 
     def store_dependencies(self):
-        logic_path = os.path.dirname(os.path.abspath("."))
+        logic_path = os.path.join(os.path.dirname(self.folder), "logic")
         parent_folder = "%s/%s" % (logic_path, "assets")
         reqspath = f"{parent_folder}/.requirements.txt"
         packagespath = "python/lib/python3.8/site-packages"
@@ -36,4 +40,4 @@ class Interface:
             check_call(args=[command], shell=True)
 
 
-Interface().run()
+Interface("logic").run()
