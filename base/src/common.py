@@ -4,8 +4,8 @@ from aws_cdk import core
 
 
 class _Settings(BaseSettings):
-    aws_region: str = "us-east-1"
-    aws_account: str = "879486499517"
+    aws_region: str
+    aws_account: str
 
 
 _SETTINGS = _Settings()

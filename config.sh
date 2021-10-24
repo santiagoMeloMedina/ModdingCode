@@ -1,2 +1,1 @@
-code base
-code logic
+alias dev="python3 op/caller.py base"
