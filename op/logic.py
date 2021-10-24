@@ -6,7 +6,8 @@ from interface import Interface
 class LogicInterface(Interface):
     def __init__(self):
         super().__init__()
-        self.path = os.path.join(os.path.dirname(self.folder), "logic")
+        self.project = "logic"
+        self.path = os.path.join(os.path.dirname(self.folder), self.project)
         self.add_command(name="libraries", _method=self.store_dependencies)
 
     def store_dependencies(self, **kwargs):

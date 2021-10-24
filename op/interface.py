@@ -14,8 +14,8 @@ class Interface:
     def add_command(self, name: str, _method: Callable):
         self.commands[name] = _method
 
-    def add_argument(self, name: str, _type: Any):
-        self.parser.add_argument(name, type=_type, default=None, required=False)
+    def add_argument(self, name: str, _type: Any, default: Any = None):
+        self.parser.add_argument(name, type=_type, default=default, required=False)
 
     def run(self):
         args = self.parser.parse_args()

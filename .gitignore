@@ -7,3 +7,4 @@ yarn-error.log
 .libs
 .requirements.txt
 .libs.zip
+.env
