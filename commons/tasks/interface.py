@@ -53,7 +53,7 @@ class Interface:
     def __set_tasks(self, task: Dict[str, Any]) -> None:
         try:
             name = task.get("name")
-            action = getattr(self.methods, task.get("name"))
+            action = getattr(self.methods, task.get("action"))
             values = task.get("values")
 
             task = Task(self.parser, name=name, action=action, values=values)

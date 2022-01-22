@@ -29,8 +29,8 @@ class Task:
         """Name for task should be descriptive"""
         self.name = name
         self.action = action
-        self.required_values = dict()
-        self.non_required_values = dict()
+        self.required_values: Dict[str, Value] = dict()
+        self.non_required_values: Dict[str, Value] = dict()
         self.set_values(values)
         self.set_task_arguments(parser)
 
@@ -85,7 +85,12 @@ class Task:
             else:
                 raise Exception(
                     "Not all required args provided: %s"
-                    % (list(self.required_values.keys()))
+                    % (
+                        [
+                            f"{key}: {self.required_values[key].description}"
+                            for key in self.required_values
+                        ]
+                    )
                 )
         except Exception as e:
             raise Task.NotRunningError(e)

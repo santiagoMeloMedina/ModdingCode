@@ -1,13 +1,13 @@
-deploy:
-  action: deploy
-  values: 
+
+hello:
+  action: hello_there
+  values:
     - 
-      name: hey
+      name: name
       type: str
       required: True
-      description: Nothing
-    - 
-      name: hi
-      type: str
-      required: False
-      description: Hello!
+      description: Name to be welcome
+
+deploy:
+  action: deploy
+  values: []
