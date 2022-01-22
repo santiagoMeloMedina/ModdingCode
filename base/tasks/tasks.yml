@@ -8,6 +8,10 @@ hello:
       required: True
       description: Name to be welcome
 
+clean:
+  action: clean
+  values: []
+
 deploy:
   action: deploy
   values: []
