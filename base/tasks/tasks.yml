@@ -1,0 +1,13 @@
+deploy:
+  action: deploy
+  values: 
+    - 
+      name: hey
+      type: str
+      required: True
+      description: Nothing
+    - 
+      name: hi
+      type: str
+      required: False
+      description: Hello!
