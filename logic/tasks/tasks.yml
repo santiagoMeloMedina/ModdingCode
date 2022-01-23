@@ -1,0 +1,17 @@
+
+hello:
+  action: hello_there
+  values:
+    - 
+      name: name
+      type: str
+      required: True
+      description: Name to be welcome
+
+clean:
+  action: clean
+  values: []
+
+libraries: 
+  action: libraries
+  values: []

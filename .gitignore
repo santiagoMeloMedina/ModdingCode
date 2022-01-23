@@ -8,3 +8,7 @@ yarn-error.log
 .requirements.txt
 .libs.zip
 .env
+logic/assets
+logic/artifacts
+
+.DS_Store
