@@ -21,7 +21,7 @@ class _S3:
         return result
 
 
-class AwsCli:
+class AwsCustomClient:
     @classmethod
     def s3(cls) -> _S3:
         return _S3()

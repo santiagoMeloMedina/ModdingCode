@@ -43,9 +43,12 @@ def hello_there(name: str, **kwargs):
     print(f"Hello there {name}!")
 
 
-def clean(**kwargs):
-    artifact_path = __libraries_get_path("artifacts")
-    commands = ["black .", f"rm -r {artifact_path}"]
+def clean(no_remove: bool = False, **kwargs):
+    commands = ["black ."]
+    if not no_remove:
+        artifact_path = __libraries_get_path("artifacts")
+        commands.append(f"rm -r {artifact_path}")
+
     for command in commands:
         __common_call(command)
 

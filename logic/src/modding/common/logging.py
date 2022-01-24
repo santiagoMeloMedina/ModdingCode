@@ -6,6 +6,7 @@ class Logger:
     INFO = "INFO"
     WARNING = "WARNING"
     ERROR = "ERROR"
+    EXCEPTION = "EXCEPTION"
 
     @property
     def __now(self) -> str:
@@ -20,3 +21,6 @@ class Logger:
 
     def error(self, message: str) -> None:
         print("%s | %s | %s" % (self.__now, self.ERROR, message))
+
+    def exception(self, message: str) -> None:
+        print("%s | %s | %s" % (self.__now, self.EXCEPTION, message))
