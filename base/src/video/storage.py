@@ -1,7 +1,7 @@
 from aws_cdk.aws_dynamodb import Attribute, AttributeType
-from src import stacks, buckets
-from src.tables import Table
+from src.commons import entities
 from singleton_injector import injector
+from src.video import stack as video_stack
 
 
 ######################################
@@ -10,8 +10,8 @@ from singleton_injector import injector
 
 
 @injector
-class VideosBucket(buckets.Bucket):
-    def __init__(self, scope: stacks.VideoStack):
+class VideosBucket(entities.Bucket):
+    def __init__(self, scope: video_stack.VideoStack):
         super().__init__(scope=scope, id="VideosBucket")
 
 
@@ -21,8 +21,8 @@ class VideosBucket(buckets.Bucket):
 
 
 @injector
-class VideoTable(Table):
-    def __init__(self, scope: stacks.VideoStack):
+class VideoTable(entities.Table):
+    def __init__(self, scope: video_stack.VideoStack):
         super().__init__(
             scope=scope,
             id="VideoDynamoDBTable",

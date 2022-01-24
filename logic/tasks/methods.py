@@ -18,6 +18,7 @@ def __common_call(command: str, load_env: bool = False):
     if load_env:
         load_dotenv()
     info_messages(command)
+
     subprocess.check_call(
         args=[command],
         shell=True,
@@ -26,27 +27,30 @@ def __common_call(command: str, load_env: bool = False):
     )
 
 
+def __libraries_get_path(folder: str):
+    parent_folder = "%s/%s" % (os.path.dirname(os.path.dirname(__file__)), folder)
+
+    if not os.path.exists(parent_folder):
+        try:
+            os.mkdir(parent_folder)
+        except:
+            os.makedirs(parent_folder)
+
+    return parent_folder
+
+
 def hello_there(name: str, **kwargs):
     print(f"Hello there {name}!")
 
 
 def clean(**kwargs):
-    command = "black ."
-    __common_call(command)
+    artifact_path = __libraries_get_path("artifacts")
+    commands = ["black .", f"rm -r {artifact_path}"]
+    for command in commands:
+        __common_call(command)
 
 
 def libraries(**kwargs):
-    def __libraries_get_path(folder: str):
-        parent_folder = "%s/%s" % (os.path.dirname(os.path.dirname(__file__)), folder)
-
-        if not os.path.exists(parent_folder):
-            try:
-                os.mkdir(parent_folder)
-            except:
-                os.makedirs(parent_folder)
-
-        return parent_folder
-
     assets_path = __libraries_get_path("assets")
     layer_libs_path = __libraries_get_path(f"assets/{AWS_LAYER_PYTHON_LIBS_STRUCTURE}")
     artifact_path = __libraries_get_path("artifacts")

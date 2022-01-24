@@ -1,5 +1,5 @@
 from aws_cdk import core
 import src.registry
-from src.common import app
+import src.commons.conf as app_conf
 
-app.synth()
+app_conf.app.synth()

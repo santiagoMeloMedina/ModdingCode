@@ -1,14 +1,14 @@
-from src import stacks, lambdas
+from src.commons import entities
 from singleton_injector import injector
-from src.video import storage
+from src.video import stack as video_stack, storage as video_storage
 
 
 @injector
-class CreateVideoLambda(lambdas.LocalLambda):
+class CreateVideoLambda(entities.Lambda):
     def __init__(
         self,
-        scope: stacks.VideoStack,
-        video_bucket: storage.VideosBucket,
+        scope: video_stack.VideoStack,
+        video_bucket: video_storage.VideosBucket,
     ):
         super().__init__(
             scope=scope,

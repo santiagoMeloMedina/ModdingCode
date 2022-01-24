@@ -1,4 +1,3 @@
-
 from argument_tasks import Interface
 import tasks.methods as task_methods
 

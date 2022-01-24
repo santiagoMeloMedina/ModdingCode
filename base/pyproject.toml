@@ -1,26 +1,26 @@
 [tool.poetry]
-name = "base"
+name = "ModdingCode-Base"
 version = "0.1.0"
 description = ""
-authors = ["BuildTools <unconfigured@null.spigotmc.org>"]
+authors = ["Santiago Melo Medina"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-mypy = "^0.910"
-pylint = "^2.11.1"
-black = "^21.9b0"
-pydantic = "^1.8.2"
 "aws-cdk.core" = "1.119.0"
 "aws-cdk.aws-dynamodb" = "1.119.0"
-pydash = "^5.1.0"
-injectable = "^3.4.7"
-python-dotenv = "^0.19.2"
-singleton-injector = "^0.1"
+"aws-cdk.aws-lambda" = "1.119.0"
+"aws-cdk.aws-s3" = "1.119.0"
+"aws-cdk.aws-apigateway" = "1.119.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
-PyYAML = "^6.0"
+pydantic = "1.8.2"
+pydash = "^5.1.0"
+python-dotenv = "^0.19.2"
+singleton-injector = "^0.2"
 argument-tasks = "^0.1"
+black = "^21.12b0"
+mypy = "^0.931"
+pylint = "^2.12.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
