@@ -9,12 +9,17 @@ class CreateVideoLambda(entities.Lambda):
         self,
         scope: video_stack.VideoStack,
         video_bucket: video_storage.VideosBucket,
+        video_table: video_storage.VideoTable,
     ):
         super().__init__(
             scope=scope,
             id="CreateVideoLambda",
             source="modding/video/create_video",
-            env={"VIDEO_BUCKET_NAME": video_bucket.bucket_name},
+            env={
+                "VIDEO_BUCKET_NAME": video_bucket.bucket_name,
+                "VIDEO_TABLE_NAME": video_table.table_name,
+            },
         )
 
-        video_bucket.grant_read_write(self)
+        self.grant_table(video_table, read=True, write=True)
+        self.grant_bucket(video_bucket, read=True, write=True)
