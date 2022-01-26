@@ -1,4 +1,5 @@
 import enum
+import json
 from typing import Any, Dict, Union
 
 
@@ -10,7 +11,11 @@ class HttpCodes(enum.Enum):
 
 
 def get_response(code: HttpCodes, body: Union[Dict[str, Any], str]) -> Dict[str, Any]:
-    return {"statusCode": code.value, "body": body}
+    return {"statusCode": code.value, "body": json.dumps(body)}
+
+
+def get_standard_success_response() -> Dict[str, Any]:
+    return get_response(HttpCodes.SUCCESS, "Success")
 
 
 def get_standard_error_response() -> Dict[str, Any]:
