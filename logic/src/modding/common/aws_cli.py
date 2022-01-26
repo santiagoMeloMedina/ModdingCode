@@ -1,7 +1,8 @@
+from typing import Any, Dict
 import boto3
 
 
-class _S3:
+class __S3:
 
     PUT_EXPIRE_TIME = 300
 
@@ -19,9 +20,24 @@ class _S3:
             },
         )
         return result
+    
+
+class __DynamoDB:
+    def __init__(self, table_name: str):
+        self.resource = boto3.resource("dynamodb")
+        self.table = self.resource.Table(table_name)
+    
+    def put_item(self, item: Dict[str, Any]) -> None:
+        self.table.put_item(
+            Item=item
+        )
 
 
 class AwsCustomClient:
     @classmethod
-    def s3(cls) -> _S3:
-        return _S3()
+    def s3(cls) -> __S3:
+        return __S3()
+
+    @classmethod
+    def dynamo(cls, table_name: str) -> __DynamoDB:
+        return __DynamoDB(table_name=table_name)
