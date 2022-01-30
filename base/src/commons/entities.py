@@ -7,6 +7,7 @@ from aws_cdk import (
     aws_dynamodb as _dynamodb,
     aws_apigateway as _apigateway,
     aws_iam as _iam,
+    aws_ssm as _ssm,
 )
 import src.commons.conf as app_conf
 from src.commons.http import HttpMethods
@@ -109,6 +110,24 @@ class Layer(_lambda.LayerVersion):
             code=_lambda.Code.from_asset(app_conf.LOGIC_LIBS_PATH),
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_8],
         )
+
+
+######################################
+##              PARAMS              ##
+######################################
+
+
+class StringParam(_ssm.StringParameter):
+    def __init__(self, scope: Any, id: str, path: str, value: str, env_name: str):
+        super().__init__(
+            scope=scope,
+            id=id,
+            type=_ssm.ParameterType.STRING,
+            parameter_name=path,
+            string_value=value,
+        )
+
+        self.env_name = env_name
 
 
 ######################################

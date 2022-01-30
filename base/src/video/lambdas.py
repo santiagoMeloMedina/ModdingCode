@@ -1,6 +1,10 @@
 from src.commons import entities
 from singleton_injector import injector
-from src.video import stack as video_stack, storage as video_storage
+from src.video import (
+    stack as video_stack,
+    storage as video_storage,
+    parameters as video_params,
+)
 
 
 @injector
@@ -10,6 +14,7 @@ class CreateVideoLambda(entities.Lambda):
         scope: video_stack.VideoStack,
         video_bucket: video_storage.VideosBucket,
         video_table: video_storage.VideoTable,
+        expiration_time: video_params.CreateVideoUrlExpirationTimeParam,
     ):
         super().__init__(
             scope=scope,
@@ -18,6 +23,7 @@ class CreateVideoLambda(entities.Lambda):
             env={
                 "VIDEO_BUCKET_NAME": video_bucket.bucket_name,
                 "VIDEO_TABLE_NAME": video_table.table_name,
+                expiration_time.env_name: expiration_time.string_value,
             },
         )
 

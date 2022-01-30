@@ -13,11 +13,10 @@ class VideoRepository:
         self.bucket_name = bucket_name
         self.table_name = table_name
 
-    def get_video_bucket_presigned_url(self, video_id: str) -> str:
+    def get_video_bucket_presigned_url(self, video_id: str, expire_time: int) -> str:
         try:
-            put_url = self.s3.put_presigned_url(
-                bucket_name=self.bucket_name,
-                object_name=video_id,
+            put_url = self.s3.put_file_presigned_url(
+                bucket_name=self.bucket_name, object_name=video_id, expire=expire_time
             )
         except Exception as e:
             raise VideoRepository.S3PresigningError(e)

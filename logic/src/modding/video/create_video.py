@@ -8,6 +8,7 @@ from modding.video import repository, models
 class _Settings(settings.Settings):
     video_bucket_name: str
     video_table_name: str
+    upload_expire_time: str
 
 
 _SETTINGS = _Settings()
@@ -30,7 +31,7 @@ def handler(event: Dict[str, Any], context: Any) -> None:
     try:
         body = parse_body(event)
 
-        video_created = create_video(body.get("video_name") or str())
+        video_created = create_video(**body)
 
         response = http.get_response(http.HttpCodes.SUCCESS, video_created)
     except:
@@ -44,9 +45,8 @@ def parse_body(event: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def generate_video_id(video_name: str):
-    random_code_pre = uuid.uuid4()
-    random_code_sub = uuid.uuid4()
-    return f"{random_code_pre}-{video_name}-{random_code_sub}"
+    random_code = uuid.uuid4()
+    return f"{video_name}-{random_code}"
 
 
 def build_video_and_upload_url(video_name: str) -> Optional[Tuple[models.Video, str]]:
@@ -55,7 +55,9 @@ def build_video_and_upload_url(video_name: str) -> Optional[Tuple[models.Video, 
     while tries < MAX_NUMBER_TRIES:
         try:
             video = models.Video(id=generate_video_id(video_name), name=video_name)
-            upload_url = _VIDEO_REPOSITORY.get_video_bucket_presigned_url(video.id)
+            upload_url = _VIDEO_REPOSITORY.get_video_bucket_presigned_url(
+                video.id, int(_SETTINGS.upload_expire_time)
+            )
             tries = MAX_NUMBER_TRIES
         except:
             tries += 1
@@ -64,7 +66,7 @@ def build_video_and_upload_url(video_name: str) -> Optional[Tuple[models.Video, 
     return video, upload_url
 
 
-def create_video(video_name: str) -> Dict[str, Any]:
+def create_video(video_name: str, **kwargs) -> Dict[str, Any]:
     result = {}
     if len(video_name):
         try:
