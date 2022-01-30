@@ -74,7 +74,10 @@ class Lambda(_lambda.Function):
         super().__init__(
             scope=scope,
             id=id,
-            code=_lambda.Code.from_asset(app_conf.LOGIC_SRC_PATH),
+            code=_lambda.Code.from_asset(
+                app_conf.LOGIC_SRC_PATH,
+                exclude=app_conf.get_excluded_files_from_logic(source),
+            ),
             handler=".".join([source, "handler"]),
             runtime=_lambda.Runtime.PYTHON_3_8,
             environment=env,
