@@ -47,6 +47,17 @@ class Table(_dynamodb.Table):
             sort_key=sort_key,
             billing_mode=_dynamodb.BillingMode.PAY_PER_REQUEST,
             stream=_dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
+            removal_policy=core.RemovalPolicy.DESTROY,
+        )
+
+    def add_secundary_index(
+        self, partition_key: _dynamodb.Attribute, sort_key: _dynamodb.Attribute = None
+    ) -> None:
+        index_name = (
+            f"{partition_key.name}{f'_{sort_key.name}' if sort_key else ''}_index"
+        )
+        self.add_global_secondary_index(
+            index_name=index_name, partition_key=partition_key, sort_key=sort_key
         )
 
 
@@ -61,7 +72,7 @@ class Bucket(_s3.Bucket):
         scope: core.Stack,
         id: str,
     ):
-        super().__init__(scope=scope, id=id)
+        super().__init__(scope=scope, id=id, removal_policy=core.RemovalPolicy.DESTROY)
 
 
 ######################################
