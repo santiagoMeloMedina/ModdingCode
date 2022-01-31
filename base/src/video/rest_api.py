@@ -15,9 +15,8 @@ class VideoRestApi(entities.LambdaRestApi):
 
         self.main_resource = self.root.add_resource("video")
 
-        add_resouce = self.main_resource.add_resource("add")
         self.add_method(
-            resource=add_resouce,
+            resource=self.main_resource,
             method=HttpMethods.POST,
             integration_lambda=add_video_lambda,
         )

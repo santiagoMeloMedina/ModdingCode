@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 import boto3
 
 
@@ -27,6 +27,9 @@ class AwsCustomClient:
         def __init__(self, table_name: str):
             self.resource = boto3.resource("dynamodb")
             self.table = self.resource.Table(table_name)
+
+        def get_item(self, values: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+            return self.table.get_item(Key=values).get("Item") or None
 
         def put_item(self, item: Dict[str, Any]) -> None:
             self.table.put_item(Item=item)

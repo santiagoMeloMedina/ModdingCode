@@ -17,6 +17,11 @@ def clean(**kwargs):
     __common_call([command])
 
 
-def deploy(**kwargs):
-    command = "cdk deploy"
+def deploy(stack: str = "--all", **kwargs):
+    command = f"cdk deploy {stack}"
+    __common_call([command])
+
+
+def destroy(dstack: str, **kwargs):
+    command = f"cdk destroy {dstack}"
     __common_call([command])

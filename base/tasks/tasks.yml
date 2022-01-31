@@ -14,4 +14,18 @@ clean:
 
 deploy:
   action: deploy
-  values: []
+  values:
+    - 
+      name: stack
+      type: str
+      required: False
+      description: Stack to deploy
+    
+destroy:
+  action: destroy
+  values:
+    - 
+      name: dstack
+      type: str
+      required: True
+      description: Stack to destroy

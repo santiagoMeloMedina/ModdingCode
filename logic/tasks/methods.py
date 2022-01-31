@@ -43,12 +43,8 @@ def hello_there(name: str, **kwargs):
     print(f"Hello there {name}!")
 
 
-def clean(no_remove: bool = False, **kwargs):
+def clean(**kwargs):
     commands = ["black ."]
-    if not no_remove:
-        artifact_path = __libraries_get_path("artifacts")
-        commands.append(f"rm -r {artifact_path}")
-
     for command in commands:
         __common_call(command)
 
@@ -59,6 +55,7 @@ def libraries(**kwargs):
     artifact_path = __libraries_get_path("artifacts")
     libs_compressed_file = ".libs.zip"
     commands = [
+        f"rm -r {artifact_path}",
         f"poetry update",
         f"poetry export > {assets_path}/.requirements.txt",
         f"pip3 install -r {assets_path}/.requirements.txt -t {layer_libs_path}",

@@ -10,12 +10,7 @@ hello:
 
 clean:
   action: clean
-  values: 
-    - 
-      name: no_remove
-      type: bool
-      required: False
-      description: Whether should not remove artifacts
+  values: []
 
 libraries: 
   action: libraries

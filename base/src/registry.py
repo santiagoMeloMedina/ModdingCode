@@ -1,1 +1,2 @@
-from src.video import storage, lambdas, rest_api
+from src.video import rest_api
+from src.minicourse import rest_api
