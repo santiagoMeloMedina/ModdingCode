@@ -81,13 +81,13 @@ class Bucket(_s3.Bucket):
 
 
 class Lambda(_lambda.Function):
-    def __init__(self, scope: Any, id: str, source: str, env: Dict[str, str]):
+    def __init__(self, scope: Stack, id: str, source: str, env: Dict[str, str]):
         super().__init__(
             scope=scope,
             id=id,
             code=_lambda.Code.from_asset(
                 app_conf.LOGIC_SRC_PATH,
-                exclude=app_conf.get_excluded_files_from_logic(source),
+                exclude=app_conf.get_excluded_files_from_logic(source, scope.stack_name),
             ),
             handler=".".join([source, "handler"]),
             runtime=_lambda.Runtime.PYTHON_3_8,

@@ -35,15 +35,16 @@ LOGIC_SRC_PATH = f"{__get_path('logic')}/src"
 LOGIC_LIBS_PATH = f"{__get_path('logic')}/artifacts/.libs.zip"
 
 
-def get_excluded_files_from_logic(source_path: str):
+def get_excluded_files_from_logic(source_path: str, stack_name: str = str()):
     finder = FileFinder(f"{source_path}.py", LOGIC_SRC_PATH)
     excluded_files = [
         file.replace(f"{LOGIC_SRC_PATH}/", "")
         for file in finder.get_excluded_from_file()
     ]
     print(
-        "Excluding %s files:\n%s"
+        "%s: Excluding %s files:\n%s"
         % (
+            stack_name,
             len(excluded_files),
             "\n".join(
                 [f"{index}. {file}" for index, file in enumerate(excluded_files)]
