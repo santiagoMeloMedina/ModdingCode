@@ -29,7 +29,7 @@ class NoVideoNameException(exception.LoggingException):
 
 def handler(event: Dict[str, Any], context: Any) -> None:
     try:
-        body = parse_body(event)
+        body = http.parse_body(event)
 
         video_created = create_video(**body)
 
@@ -37,11 +37,6 @@ def handler(event: Dict[str, Any], context: Any) -> None:
     except:
         response = http.get_standard_error_response()
     return response
-
-
-def parse_body(event: Dict[str, Any]) -> Dict[str, Any]:
-    body = event.get("body") or str()
-    return json.loads(body)
 
 
 def generate_video_id(video_name: str):

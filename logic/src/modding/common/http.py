@@ -20,3 +20,8 @@ def get_standard_success_response() -> Dict[str, Any]:
 
 def get_standard_error_response() -> Dict[str, Any]:
     return get_response(HttpCodes.ERROR, "Error")
+
+
+def parse_body(event: Dict[str, Any]) -> Dict[str, Any]:
+    body = event.get("body") or str()
+    return json.loads(body)

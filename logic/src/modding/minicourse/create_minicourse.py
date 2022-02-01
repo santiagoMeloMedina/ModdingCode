@@ -32,7 +32,7 @@ class MinicourseNotBuilt(exception.LoggingErrorException):
 
 def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
     try:
-        body = parse_body(event)
+        body = http.parse_body(event)
 
         created_minicourse, thumb_upload_url = create_minicourse(**body)
 
@@ -46,11 +46,6 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
         response = http.get_standard_error_response()
 
     return response
-
-
-def parse_body(event: Dict[str, Any]) -> Dict[str, Any]:
-    body = event.get("body") or str()
-    return json.loads(body)
 
 
 def generate_id(category_id: str) -> str:
@@ -75,7 +70,10 @@ def build_minicourse(
     while tries < MAX_NUMBER_TRIES:
         try:
             minicourse = models.Minicourse(
-                id=generate_id(category_id), name=name, category_id=category_id
+                id=generate_id(category_id),
+                name=name,
+                category_id=category_id,
+                thumb_ext=thumb_ext,
             )
             thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
                 f"{minicourse.id}.{clean_extension(thumb_ext)}",
