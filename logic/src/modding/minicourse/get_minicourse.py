@@ -38,20 +38,39 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]):
     return response
 
 
-def get_minicourse(id: str, **kwargs) -> Dict[str, Any]:
+def clean_extension(extension: str) -> str:
+    result = []
+    for character in extension:
+        if character.isalpha():
+            result.append(character)
+
+    return "".join(result)
+
+
+def get_minicourse(id: str, get_thumb: bool = False, **kwargs) -> Dict[str, Any]:
     minicourse = MINICOURSE_REPOSITORY.get_minicourse_by_id(id)
-    object_name = f"{id}.{minicourse.thumb_ext}"
-    thumb_download_url = MINICOURSE_REPOSITORY.get_thumb_get_presigned_url(
-        object_name, int(_SETTINGS.thumb_download_expire_time)
-    )
-    return {"minicourse": minicourse.dict(), "thumb_download_url": thumb_download_url}
+    object_name = f"{id}.{clean_extension(minicourse.thumb_ext)}"
+    if get_thumb:
+        thumb_download_url = MINICOURSE_REPOSITORY.get_thumb_get_presigned_url(
+            object_name, int(_SETTINGS.thumb_download_expire_time)
+        )
+        result = {
+            "minicourse": minicourse.dict(),
+            "thumb_download_url": thumb_download_url,
+        }
+    else:
+        result = {"minicourse": minicourse.dict()}
+
+    return result
 
 
-def get_multiple_minicourses(ids: List[str], **kwargs) -> Dict[str, Any]:
+def get_multiple_minicourses(
+    ids: List[str], get_thumb: bool = False, **kwargs
+) -> Dict[str, Any]:
     if len(ids) <= int(_SETTINGS.multiple_minicourse_retrival_limit):
         result = []
         for id in ids:
-            result.append(get_minicourse(id))
+            result.append(get_minicourse(id, get_thumb))
         return {"minicourses": result}
     else:
         raise TooManyMinicoursesRetrival()
@@ -59,7 +78,7 @@ def get_multiple_minicourses(ids: List[str], **kwargs) -> Dict[str, Any]:
 
 def get_minicourse_thumb_upload_url(id: str, **kwargs) -> Dict[str, Any]:
     minicourse = MINICOURSE_REPOSITORY.get_minicourse_by_id(id)
-    object_name = f"{id}.{minicourse.thumb_ext}"
+    object_name = f"{id}.{clean_extension(minicourse.thumb_ext)}"
     thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
         object_name, int(_SETTINGS.thumb_upload_expire_time)
     )

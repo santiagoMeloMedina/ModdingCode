@@ -1,5 +1,3 @@
-from distutils.command.upload import upload
-import json
 import uuid
 from typing import Any, Dict, Tuple
 from modding.common import exception, settings, logging, http
@@ -69,6 +67,7 @@ def build_minicourse(
     tries = 0
     while tries < MAX_NUMBER_TRIES:
         try:
+            thumb_ext = clean_extension(thumb_ext)
             minicourse = models.Minicourse(
                 id=generate_id(category_id),
                 name=name,
@@ -76,7 +75,7 @@ def build_minicourse(
                 thumb_ext=thumb_ext,
             )
             thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
-                f"{minicourse.id}.{clean_extension(thumb_ext)}",
+                f"{minicourse.id}.{thumb_ext}",
                 int(_SETTINGS.thumb_upload_expire_time),
             )
             tries = MAX_NUMBER_TRIES

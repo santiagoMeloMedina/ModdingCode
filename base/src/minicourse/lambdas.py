@@ -53,3 +53,20 @@ class GetMinicourseLambda(entities.Lambda):
 
         self.grant_table(table=minicourse_table, read=True, write=True)
         self.grant_bucket(minicourse_bucket, read=True, write=True)
+
+
+@injector
+class UpdateMinicourseLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: minicourse_stack.MinicourseStack,
+        minicourse_table: minicourse_storage.MinicourseTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="UpdateMinicourseLambda",
+            source="modding/minicourse/update_minicourse",
+            env={"MINICOURSE_TABLE_NAME": minicourse_table.table_name},
+        )
+
+        self.grant_table(table=minicourse_table, read=True, write=True)

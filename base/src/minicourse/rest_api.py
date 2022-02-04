@@ -11,6 +11,7 @@ class MinicourseRestApi(entities.LambdaRestApi):
         scope: minicourse_stack.MinicourseStack,
         create_minicourse: minicourse_lambdas.CreateMinicourseLambda,
         get_minicourse: minicourse_lambdas.GetMinicourseLambda,
+        update_minicourse: minicourse_lambdas.UpdateMinicourseLambda,
     ):
         super().__init__(scope=scope, id="MinicourseRestApi", name="MinicourseRestApi")
 
@@ -28,4 +29,10 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.get_minicourse,
             method=HttpMethods.POST,
             integration_lambda=get_minicourse,
+        )
+
+        self.add_method(
+            self.main_resource,
+            method=HttpMethods.PUT,
+            integration_lambda=update_minicourse,
         )
