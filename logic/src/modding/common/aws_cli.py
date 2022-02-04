@@ -23,6 +23,19 @@ class AwsCustomClient:
             )
             return result
 
+        def get_file_presigned_url(
+            self, bucket_name: str, object_name: str, expire: int
+        ) -> str:
+            result = self.client.generate_presigned_url(
+                ClientMethod="get_object",
+                Params={
+                    "Bucket": bucket_name,
+                    "Key": object_name,
+                },
+                ExpiresIn=expire,
+            )
+            return result
+
     class __DynamoDB:
         def __init__(self, table_name: str):
             self.resource = boto3.resource("dynamodb")

@@ -41,14 +41,12 @@ def get_excluded_files_from_logic(source_path: str, stack_name: str = str()):
         file.replace(f"{LOGIC_SRC_PATH}/", "")
         for file in finder.get_excluded_from_file()
     ]
-    print(
-        "%s: Excluding %s files:\n%s"
-        % (
-            stack_name,
-            len(excluded_files),
-            "\n".join(
-                [f"{index}. {file}" for index, file in enumerate(excluded_files)]
-            ),
-        )
-    )
+    # "%s: Excluding %s files:\n%s"
+    # % (
+    #     stack_name,
+    #     len(excluded_files),
+    #     "\n".join(
+    #         [f"{index}. {file}" for index, file in enumerate(excluded_files)]
+    #     ),
+    # )
     return excluded_files

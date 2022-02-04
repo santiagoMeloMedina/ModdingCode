@@ -56,6 +56,7 @@ def libraries(**kwargs):
     libs_compressed_file = ".libs.zip"
     commands = [
         f"rm -r {artifact_path}",
+        f"mkdir {artifact_path}",
         f"poetry update",
         f"poetry export > {assets_path}/.requirements.txt",
         f"pip3 install -r {assets_path}/.requirements.txt -t {layer_libs_path}",

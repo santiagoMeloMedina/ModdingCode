@@ -10,3 +10,4 @@ class Minicourse(pydantic.BaseModel):
     id: str
     category_id: str
     name: str
+    thumb_ext: str

@@ -24,6 +24,8 @@ class Stack(core.Stack):
             scope=app_conf.app, id=id, stack_name=name, env=app_conf.environment
         )
 
+        self.layer = Layer(scope=self)
+
 
 ######################################
 ##            DYNAMODB              ##
@@ -87,12 +89,14 @@ class Lambda(_lambda.Function):
             id=id,
             code=_lambda.Code.from_asset(
                 app_conf.LOGIC_SRC_PATH,
-                exclude=app_conf.get_excluded_files_from_logic(source, scope.stack_name),
+                exclude=app_conf.get_excluded_files_from_logic(
+                    source, scope.stack_name
+                ),
             ),
             handler=".".join([source, "handler"]),
             runtime=_lambda.Runtime.PYTHON_3_8,
             environment=env,
-            layers=[Layer(scope=scope)],
+            layers=[scope.layer],
         )
 
     def grant_table(

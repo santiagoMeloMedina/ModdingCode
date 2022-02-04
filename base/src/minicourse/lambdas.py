@@ -28,3 +28,28 @@ class CreateMinicourseLambda(entities.Lambda):
         self.grant_table(table=minicourse_table, read=True, write=True)
         self.grant_table(table=category_table, read=True)
         self.grant_bucket(minicourse_bucket, read=True, write=True)
+
+
+@injector
+class GetMinicourseLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: minicourse_stack.MinicourseStack,
+        minicourse_table: minicourse_storage.MinicourseTable,
+        minicourse_bucket: minicourse_storage.MinicourseBucket,
+    ):
+        super().__init__(
+            scope=scope,
+            id="GetMinicourseLambda",
+            source="modding/minicourse/get_minicourse",
+            env={
+                "MINICOURSE_BUCKET_NAME": minicourse_bucket.bucket_name,
+                "MINICOURSE_TABLE_NAME": minicourse_table.table_name,
+                "THUMB_DOWNLOAD_EXPIRE_TIME": "300",
+                "THUMB_UPLOAD_EXPIRE_TIME": "300",
+                "MULTIPLE_MINICOURSE_RETRIVAL_LIMIT": "10",
+            },
+        )
+
+        self.grant_table(table=minicourse_table, read=True, write=True)
+        self.grant_bucket(minicourse_bucket, read=True, write=True)
