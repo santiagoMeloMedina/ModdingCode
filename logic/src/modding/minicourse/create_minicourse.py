@@ -1,7 +1,7 @@
-import uuid
 from typing import Any, Dict, Tuple
 from modding.common import exception, settings, logging, http
 from modding.minicourse import repository, models
+from modding.utils import id_generator, files
 
 
 class _Settings(settings.Settings):
@@ -46,44 +46,35 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
     return response
 
 
-def generate_id(category_id: str) -> str:
-    random_code = uuid.uuid4()
-    return f"{category_id}-{random_code}"
+def build_and_get_upload_url(
+    name: str, thumb_ext: str, category_id: str, id: str
+) -> Tuple[models.Minicourse, str]:
+    thumb_ext = files.clean_extension(thumb_ext)
+    minicourse = models.Minicourse(
+        id=id,
+        name=name,
+        category_id=category_id,
+        thumb_ext=thumb_ext,
+    )
+    thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
+        f"{minicourse.id}.{thumb_ext}",
+        int(_SETTINGS.thumb_upload_expire_time),
+    )
 
-
-def clean_extension(extension: str) -> str:
-    result = []
-    for character in extension:
-        if character.isalpha():
-            result.append(character)
-
-    return "".join(result)
+    return minicourse, thumb_upload_url
 
 
 def build_minicourse(
     name: str, category_id: str, thumb_ext: str
 ) -> Tuple[models.Minicourse, str]:
-    minicourse, thumb_upload_url = None, None
-    tries = 0
-    while tries < MAX_NUMBER_TRIES:
-        try:
-            thumb_ext = clean_extension(thumb_ext)
-            minicourse = models.Minicourse(
-                id=generate_id(category_id),
-                name=name,
-                category_id=category_id,
-                thumb_ext=thumb_ext,
-            )
-            thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
-                f"{minicourse.id}.{thumb_ext}",
-                int(_SETTINGS.thumb_upload_expire_time),
-            )
-            tries = MAX_NUMBER_TRIES
-        except:
-            tries += 1
-            _LOGGER.warning(f"Thumb upload url could not be generated, try #{tries}")
-
-    return minicourse, thumb_upload_url
+    return id_generator.retrier_with_generator(
+        category_id,
+        func=build_and_get_upload_url,
+        params=([], {"name": name, "thumb_ext": thumb_ext, "category_id": category_id}),
+        tries=MAX_NUMBER_TRIES,
+        logging_method=_LOGGER.warning,
+        failed_message="Thumb upload url could not be generated",
+    )
 
 
 def create_minicourse(

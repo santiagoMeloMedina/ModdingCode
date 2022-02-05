@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 from modding.common import http, logging, settings, exception
 from modding.minicourse import repository
+from modding.utils import files
 
 
 class _Settings(settings.Settings):
@@ -38,18 +39,9 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]):
     return response
 
 
-def clean_extension(extension: str) -> str:
-    result = []
-    for character in extension:
-        if character.isalpha():
-            result.append(character)
-
-    return "".join(result)
-
-
 def get_minicourse(id: str, get_thumb: bool = False, **kwargs) -> Dict[str, Any]:
     minicourse = MINICOURSE_REPOSITORY.get_minicourse_by_id(id)
-    object_name = f"{id}.{clean_extension(minicourse.thumb_ext)}"
+    object_name = f"{id}.{files.clean_extension(minicourse.thumb_ext)}"
     if get_thumb:
         thumb_download_url = MINICOURSE_REPOSITORY.get_thumb_get_presigned_url(
             object_name, int(_SETTINGS.thumb_download_expire_time)
@@ -78,7 +70,7 @@ def get_multiple_minicourses(
 
 def get_minicourse_thumb_upload_url(id: str, **kwargs) -> Dict[str, Any]:
     minicourse = MINICOURSE_REPOSITORY.get_minicourse_by_id(id)
-    object_name = f"{id}.{clean_extension(minicourse.thumb_ext)}"
+    object_name = f"{id}.{files.clean_extension(minicourse.thumb_ext)}"
     thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
         object_name, int(_SETTINGS.thumb_upload_expire_time)
     )
