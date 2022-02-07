@@ -2,9 +2,9 @@ from typing import Any, Callable, Dict, List, Tuple
 import uuid
 
 
-def generate_id(id: str) -> str:
+def generate_id(prefix: str) -> str:
     random_code = uuid.uuid4()
-    return f"{id}-{random_code}"
+    return f"{prefix}-{random_code}"
 
 
 def retrier_caller(
@@ -19,11 +19,11 @@ def retrier_caller(
         try:
             args, kwargs = params
             return func(*args, **kwargs)
-        except:
+        except Exception as e:
             try_number += 1
             if logging_method:
                 logging_method(
-                    f"{'%s, ' % (failed_message) if failed_message else ''}try #{try_number}"
+                    f"{'%s, ' % (failed_message) if failed_message else ''}try #{try_number}, {e}"
                 )
 
     if logging_method:

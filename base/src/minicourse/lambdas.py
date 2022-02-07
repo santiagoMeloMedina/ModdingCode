@@ -18,9 +18,9 @@ class CreateMinicourseLambda(entities.Lambda):
             id="CreateMinicourseLambda",
             source="modding/minicourse/create_minicourse",
             env={
-                "MINICOURSE_BUCKET_NAME": minicourse_bucket.bucket_name,
-                "MINICOURSE_TABLE_NAME": minicourse_table.table_name,
-                "CATEGORY_TABLE_NAME": category_table.table_name,
+                **minicourse_table.get_env_name_var(),
+                **minicourse_bucket.get_env_name_var(),
+                **category_table.get_env_name_var(),
                 "THUMB_UPLOAD_EXPIRE_TIME": "300",
             },
         )
@@ -43,8 +43,8 @@ class GetMinicourseLambda(entities.Lambda):
             id="GetMinicourseLambda",
             source="modding/minicourse/get_minicourse",
             env={
-                "MINICOURSE_BUCKET_NAME": minicourse_bucket.bucket_name,
-                "MINICOURSE_TABLE_NAME": minicourse_table.table_name,
+                **minicourse_table.get_env_name_var(),
+                **minicourse_bucket.get_env_name_var(),
                 "THUMB_DOWNLOAD_EXPIRE_TIME": "300",
                 "THUMB_UPLOAD_EXPIRE_TIME": "300",
                 "MULTIPLE_MINICOURSE_RETRIVAL_LIMIT": "10",
@@ -66,7 +66,9 @@ class UpdateMinicourseLambda(entities.Lambda):
             scope=scope,
             id="UpdateMinicourseLambda",
             source="modding/minicourse/update_minicourse",
-            env={"MINICOURSE_TABLE_NAME": minicourse_table.table_name},
+            env={
+                **minicourse_table.get_env_name_var(),
+            },
         )
 
         self.grant_table(table=minicourse_table, read=True, write=True)

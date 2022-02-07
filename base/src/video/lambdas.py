@@ -12,7 +12,7 @@ class CreateVideoLambda(entities.Lambda):
     def __init__(
         self,
         scope: video_stack.VideoStack,
-        video_bucket: video_storage.VideosBucket,
+        video_bucket: video_storage.VideoBucket,
         video_table: video_storage.VideoTable,
         expiration_time: video_params.CreateVideoUrlExpirationTimeParam,
     ):
@@ -21,8 +21,8 @@ class CreateVideoLambda(entities.Lambda):
             id="CreateVideoLambda",
             source="modding/video/create_video",
             env={
-                "VIDEO_BUCKET_NAME": video_bucket.bucket_name,
-                "VIDEO_TABLE_NAME": video_table.table_name,
+                **video_table.get_env_name_var(),
+                **video_bucket.get_env_name_var(),
                 expiration_time.env_name: expiration_time.string_value,
             },
         )

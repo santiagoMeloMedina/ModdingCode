@@ -1,7 +1,7 @@
 from aws_cdk.aws_dynamodb import Attribute, AttributeType
 from src.commons import entities
 from singleton_injector import injector
-from src.video import stack as video_stack
+from src.problem import stack
 
 
 ######################################
@@ -10,9 +10,9 @@ from src.video import stack as video_stack
 
 
 @injector
-class VideoBucket(entities.Bucket):
-    def __init__(self, scope: video_stack.VideoStack):
-        super().__init__(scope=scope, id="VideoBucket", entity_name="Video")
+class ProblemBucket(entities.Bucket):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(scope=scope, id="ProblemBucket", entity_name="Problem")
 
 
 ######################################
@@ -21,10 +21,14 @@ class VideoBucket(entities.Bucket):
 
 
 @injector
-class VideoTable(entities.Table):
-    def __init__(self, scope: video_stack.VideoStack):
+class ProblemTable(entities.Table):
+    def __init__(self, scope: stack.ProblemStack):
         super().__init__(
             scope=scope,
-            entity_name="Video",
+            entity_name="Problem",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
+        )
+
+        self.add_secundary_index(
+            partition_key=Attribute(name="minicourse_id", type=AttributeType.STRING)
         )

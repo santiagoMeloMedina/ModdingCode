@@ -12,7 +12,7 @@ from src.minicourse import stack as minicourse_stack
 @injector
 class MinicourseBucket(entities.Bucket):
     def __init__(self, scope: minicourse_stack.MinicourseStack):
-        super().__init__(scope=scope, id="MinicourseBucket")
+        super().__init__(scope=scope, id="MinicourseBucket", entity_name="Minicourse")
 
 
 ######################################
@@ -25,8 +25,7 @@ class MinicourseTable(entities.Table):
     def __init__(self, scope: minicourse_stack.MinicourseStack):
         super().__init__(
             scope=scope,
-            id="MinicourseTable",
-            name="MinicourseTable",
+            entity_name="Minicourse",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
         )
 
@@ -40,7 +39,6 @@ class CategoryTable(entities.Table):
     def __init__(self, scope: minicourse_stack.MinicourseStack):
         super().__init__(
             scope=scope,
-            id="CategoryTable",
-            name="CategoryTable",
+            entity_name="Category",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
         )

@@ -36,21 +36,24 @@ class Table(_dynamodb.Table):
     def __init__(
         self,
         scope: core.Stack,
-        id: str,
-        name: str,
+        entity_name: str,
         partition_key: _dynamodb.Attribute,
         sort_key: Optional[_dynamodb.Attribute] = None,
     ):
         super().__init__(
             scope=scope,
-            id=id,
-            table_name=name,
+            id=f"{entity_name}Table",
+            table_name=f"{scope.stack_name}_{entity_name}",
             partition_key=partition_key,
             sort_key=sort_key,
             billing_mode=_dynamodb.BillingMode.PAY_PER_REQUEST,
             stream=_dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
             removal_policy=core.RemovalPolicy.DESTROY,
         )
+        self.entity_name = entity_name
+
+    def get_env_name_var(self) -> Dict[str, Any]:
+        return {f"{self.entity_name.upper()}_TABLE_NAME": self.table_name}
 
     def add_secundary_index(
         self, partition_key: _dynamodb.Attribute, sort_key: _dynamodb.Attribute = None
@@ -69,12 +72,12 @@ class Table(_dynamodb.Table):
 
 
 class Bucket(_s3.Bucket):
-    def __init__(
-        self,
-        scope: core.Stack,
-        id: str,
-    ):
+    def __init__(self, scope: core.Stack, id: str, entity_name: str):
         super().__init__(scope=scope, id=id, removal_policy=core.RemovalPolicy.DESTROY)
+        self.entity_name = entity_name
+
+    def get_env_name_var(self) -> Dict[str, Any]:
+        return {f"{self.entity_name.upper()}_BUCKET_NAME": self.bucket_name}
 
 
 ######################################
