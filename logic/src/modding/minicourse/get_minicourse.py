@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from modding.common import http, logging, settings, exception
-from modding.minicourse import repository
+from modding.minicourse import repository, models
 from modding.utils import files
 
 
@@ -17,7 +17,7 @@ _LOGGER = logging.Logger()
 
 
 MINICOURSE_REPOSITORY = repository.MinicourseRepository(
-    minicourse_table_name=_SETTINGS.minicourse_table_name,
+    table_name=_SETTINGS.minicourse_table_name,
     bucket_name=_SETTINGS.minicourse_bucket_name,
 )
 
@@ -40,10 +40,10 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]):
 
 
 def get_minicourse(id: str, get_thumb: bool = False, **kwargs) -> Dict[str, Any]:
-    minicourse = MINICOURSE_REPOSITORY.get_minicourse_by_id(id)
+    minicourse: models.Minicourse = MINICOURSE_REPOSITORY.get_item_by_id(id)
     object_name = f"{id}.{files.clean_extension(minicourse.thumb_ext)}"
     if get_thumb:
-        thumb_download_url = MINICOURSE_REPOSITORY.get_thumb_get_presigned_url(
+        thumb_download_url = MINICOURSE_REPOSITORY.thumb_get_presigned_url(
             object_name, int(_SETTINGS.thumb_download_expire_time)
         )
         result = {
@@ -69,9 +69,9 @@ def get_multiple_minicourses(
 
 
 def get_minicourse_thumb_upload_url(id: str, **kwargs) -> Dict[str, Any]:
-    minicourse = MINICOURSE_REPOSITORY.get_minicourse_by_id(id)
+    minicourse: models.Minicourse = MINICOURSE_REPOSITORY.get_item_by_id(id)
     object_name = f"{id}.{files.clean_extension(minicourse.thumb_ext)}"
-    thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
+    thumb_upload_url = MINICOURSE_REPOSITORY.thumb_put_presigned_url(
         object_name, int(_SETTINGS.thumb_upload_expire_time)
     )
     return {"thumb_upload_url": thumb_upload_url}
