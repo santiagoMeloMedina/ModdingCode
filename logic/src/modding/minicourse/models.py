@@ -1,12 +1,12 @@
-import pydantic
+from modding.common import model
 
 
-class Category(pydantic.BaseModel):
+class Category(model.Model):
     id: str
     name: str
 
 
-class Minicourse(pydantic.BaseModel):
+class Minicourse(model.Model):
     id: str
     category_id: str
     name: str

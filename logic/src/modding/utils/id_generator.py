@@ -2,9 +2,9 @@ from typing import Any, Callable, Dict, List, Tuple
 import uuid
 
 
-def generate_id(prefix: str) -> str:
-    random_code = uuid.uuid4()
-    return f"{prefix}-{random_code}"
+def generate_id(prefix: str, length: int) -> str:
+    random_code = str(uuid.uuid4()).replace("-", "")
+    return f"{prefix}-{random_code[:length]}"
 
 
 def retrier_caller(
@@ -30,7 +30,7 @@ def retrier_caller(
         logging_method("Failed all tries")
 
 
-def retrier_with_generator(prefix: str, **kwargs: Any) -> Any:
+def retrier_with_generator(prefix: str, length: int, **kwargs: Any) -> Any:
     """
     func: Callable,
     params: (*args, **kwargs),
@@ -41,18 +41,9 @@ def retrier_with_generator(prefix: str, **kwargs: Any) -> Any:
     func = kwargs.get("func")
 
     def __generate_id_and_call(*func_args: Any, **func_kwargs: Any) -> Any:
-        func_kwargs.update({**func_kwargs, "id": generate_id(prefix)})
+        func_kwargs.update({**func_kwargs, "id": generate_id(prefix, length)})
         return func(*func_args, **func_kwargs)
 
     kwargs.update({"func": __generate_id_and_call})
 
     return retrier_caller(**kwargs)
-
-
-def create_hey(id: str):
-    import random
-
-    if random.randint(0, 10) > 8:
-        print(f"great id: {id}!")
-    else:
-        raise Exception()

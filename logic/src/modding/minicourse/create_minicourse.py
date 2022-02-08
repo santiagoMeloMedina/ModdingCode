@@ -2,6 +2,7 @@ from typing import Any, Dict, Tuple
 from modding.common import exception, settings, logging, http
 from modding.minicourse import repository, models
 from modding.utils import id_generator, files
+from modding.minicourse.category import repository as category_repository
 
 
 class _Settings(settings.Settings):
@@ -15,12 +16,15 @@ _SETTINGS = _Settings()
 _LOGGER = logging.Logger()
 
 MINICOURSE_REPOSITORY = repository.MinicourseRepository(
-    _SETTINGS.minicourse_table_name,
-    _SETTINGS.minicourse_bucket_name,
-    _SETTINGS.category_table_name,
+    _SETTINGS.minicourse_table_name, _SETTINGS.minicourse_bucket_name
+)
+
+CATEGORY_REPOSITORY = category_repository.CategoryRepository(
+    _SETTINGS.category_table_name
 )
 
 MAX_NUMBER_TRIES = 3
+MINICOURSE_ID_LENGTH = 8
 
 
 class MinicourseNotBuilt(exception.LoggingErrorException):
@@ -51,12 +55,9 @@ def build_and_get_upload_url(
 ) -> Tuple[models.Minicourse, str]:
     thumb_ext = files.clean_extension(thumb_ext)
     minicourse = models.Minicourse(
-        id=id,
-        name=name,
-        category_id=category_id,
-        thumb_ext=thumb_ext,
+        id=id, name=name, category_id=category_id, thumb_ext=thumb_ext
     )
-    thumb_upload_url = MINICOURSE_REPOSITORY.get_thumb_put_presigned_url(
+    thumb_upload_url = MINICOURSE_REPOSITORY.thumb_put_presigned_url(
         f"{minicourse.id}.{thumb_ext}",
         int(_SETTINGS.thumb_upload_expire_time),
     )
@@ -69,6 +70,7 @@ def build_minicourse(
 ) -> Tuple[models.Minicourse, str]:
     return id_generator.retrier_with_generator(
         category_id,
+        MINICOURSE_ID_LENGTH,
         func=build_and_get_upload_url,
         params=([], {"name": name, "thumb_ext": thumb_ext, "category_id": category_id}),
         tries=MAX_NUMBER_TRIES,
@@ -80,10 +82,10 @@ def build_minicourse(
 def create_minicourse(
     name: str, category_id: str, thumb_ext: str, **kwargs
 ) -> Tuple[models.Minicourse, str]:
-    category = MINICOURSE_REPOSITORY.get_category_by_id(category_id)
+    category: models.Category = CATEGORY_REPOSITORY.get_item_by_id(category_id)
     minicourse, thumb_upload_url = build_minicourse(name, category.id, thumb_ext)
     if minicourse is not None and thumb_upload_url is not None:
-        MINICOURSE_REPOSITORY.save_data(minicourse)
+        MINICOURSE_REPOSITORY.save_on_table(minicourse)
     else:
         raise MinicourseNotBuilt()
 

@@ -6,16 +6,15 @@ class AwsCustomClient:
     class __S3:
         PUT_EXPIRE_TIME = 300
 
-        def __init__(self):
+        def __init__(self, bucket_name: str):
             self.client = boto3.client("s3")
+            self.bucket_name = bucket_name
 
-        def put_file_presigned_url(
-            self, bucket_name: str, object_name: str, expire: int
-        ) -> str:
+        def put_file_presigned_url(self, object_name: str, expire: int) -> str:
             result = self.client.generate_presigned_url(
                 ClientMethod="put_object",
                 Params={
-                    "Bucket": bucket_name,
+                    "Bucket": self.bucket_name,
                     "Key": object_name,
                     "ContentType": "binary/octet-stream",
                     "Expires": expire,
@@ -23,13 +22,11 @@ class AwsCustomClient:
             )
             return result
 
-        def get_file_presigned_url(
-            self, bucket_name: str, object_name: str, expire: int
-        ) -> str:
+        def get_file_presigned_url(self, object_name: str, expire: int) -> str:
             result = self.client.generate_presigned_url(
                 ClientMethod="get_object",
                 Params={
-                    "Bucket": bucket_name,
+                    "Bucket": self.bucket_name,
                     "Key": object_name,
                 },
                 ExpiresIn=expire,
@@ -51,8 +48,8 @@ class AwsCustomClient:
             self.table.delete_item(Key=key)
 
     @classmethod
-    def s3(cls) -> __S3:
-        return cls.__S3()
+    def s3(cls, bucket_name: str) -> __S3:
+        return cls.__S3(bucket_name)
 
     @classmethod
     def dynamo(cls, table_name: str) -> __DynamoDB:
