@@ -3,7 +3,7 @@ import boto3
 
 
 class AwsCustomClient:
-    class __S3:
+    class S3:
         PUT_EXPIRE_TIME = 300
 
         def __init__(self, bucket_name: str):
@@ -33,7 +33,7 @@ class AwsCustomClient:
             )
             return result
 
-    class __DynamoDB:
+    class DynamoDB:
         def __init__(self, table_name: str):
             self.resource = boto3.resource("dynamodb")
             self.table = self.resource.Table(table_name)
@@ -48,9 +48,9 @@ class AwsCustomClient:
             self.table.delete_item(Key=key)
 
     @classmethod
-    def s3(cls, bucket_name: str) -> __S3:
-        return cls.__S3(bucket_name)
+    def s3(cls, bucket_name: str) -> S3:
+        return cls.S3(bucket_name)
 
     @classmethod
-    def dynamo(cls, table_name: str) -> __DynamoDB:
-        return cls.__DynamoDB(table_name=table_name)
+    def dynamo(cls, table_name: str) -> DynamoDB:
+        return cls.DynamoDB(table_name=table_name)

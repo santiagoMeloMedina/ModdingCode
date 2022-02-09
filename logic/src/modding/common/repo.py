@@ -4,7 +4,7 @@ from modding.utils import date
 
 
 class Repository:
-    class __NotFoundEntityException(exception.LoggingException):
+    class _NotFoundEntityException(exception.LoggingException):
         def __init__(self, id: str, entity: str):
             super().__init__("Can not find %s with the provided id %s" % (entity, id))
 
@@ -23,12 +23,16 @@ class Repository:
             super().__init__("Can not get presigned url, %s" % (message))
 
     def __init__(self, name: str, table_name: str, bucket_name: str) -> None:
-        self.NotFoundEntityException = lambda entity_id: self.__NotFoundEntityException(
+        self.NotFoundEntityException = lambda entity_id: self._NotFoundEntityException(
             id=entity_id, entity=name
         )
 
         self.table = aws_cli.AwsCustomClient.dynamo(table_name)
         self.s3 = aws_cli.AwsCustomClient.s3(bucket_name)
+        self.__model: model.Model = model.Model
+
+    def set_model(self, _model: model.Model) -> None:
+        self.__model = _model
 
     def __item_from_table_exists(self, entity_body: model.Model) -> bool:
         item = self.table.get_item({"id": entity_body.id})
@@ -37,7 +41,7 @@ class Repository:
     def get_item_by_id(self, id: str) -> model.Model:
         item = self.table.get_item({"id": id})
         if item is not None:
-            return item
+            return self.__model.parse_obj(item)
         else:
             raise self.NotFoundEntityException(id)
 

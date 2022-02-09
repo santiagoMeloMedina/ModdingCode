@@ -123,11 +123,17 @@ def test_get_multiple_minicourses_too_many(
     "modding.common.repo.Repository.put_presigned_url",
     return_value=MOCK_MINICOURSE_THUMB_UPLOAD_URL,
 )
-@patch("modding.minicourse.get_minicourse.get_minicourse")
+@patch("modding.minicourse.repository.MinicourseRepository.get_item_by_id")
 def test_get_minicourse_thumb_upload_url(
-    get_minicourse: Mock, put_presigned_url: Mock
+    minicourse_get_item_by_id: Mock, put_presigned_url: Mock
 ) -> None:
-    from modding.minicourse import get_minicourse as subject
+    from modding.minicourse import get_minicourse as subject, models
+
+    MOCK_MINICOURSE = models.Minicourse(
+        id=MOCK_MINICOURSE_ID, name=AnyStr(), category_id=AnyStr(), ext=AnyStr()
+    )
+
+    minicourse_get_item_by_id.return_value = MOCK_MINICOURSE
 
     result = subject.get_minicourse_thumb_upload_url(MOCK_MINICOURSE_ID)
 

@@ -19,6 +19,10 @@ MOCK_MINICOURSE_DATA = {
 MOCK_MINICOURSE_ID = "12341234-413243124"
 MOCK_MINICOURSE_THUMB_UPLOAD_URL = "http://thumb"
 
+MOCK_EVENT_BODY = (
+    '{\n    "name": "test1",\n    "category_id": "category1",\n    "ext": "..png"\n}'
+)
+
 
 @pytest.mark.unit
 @patch.dict(os.environ, _DEFAULT_ENVIRONMENT)
@@ -86,3 +90,27 @@ def test_create_minicourse(
 
     assert minicourse == mock_minicourse
     save_on_table.assert_called_once_with(minicourse)
+
+
+@pytest.mark.unit
+@patch.dict(os.environ, _DEFAULT_ENVIRONMENT)
+@patch(
+    "modding.common.repo.Repository.put_presigned_url",
+    return_value=MOCK_MINICOURSE_THUMB_UPLOAD_URL,
+)
+@patch("modding.minicourse.category.repository.CategoryRepository.get_item_by_id")
+@patch("modding.common.repo.Repository.save_on_table")
+def test_handler(
+    save_on_table: Mock,
+    category_get_item_by_id: Mock,
+    put_presigned_url: Mock,
+):
+    from modding.minicourse import create_minicourse as subject, models
+
+    MOCK_CATEGORY = models.Category(id="cat1", name="category1")
+
+    category_get_item_by_id.return_value = MOCK_CATEGORY
+
+    minicourse, upload_url = subject.handler(
+        event={"body": MOCK_EVENT_BODY}, context={}
+    )

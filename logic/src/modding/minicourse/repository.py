@@ -1,4 +1,5 @@
 from modding.common import repo
+from modding.minicourse import models
 
 
 class MinicourseRepository(repo.Repository):
@@ -9,6 +10,8 @@ class MinicourseRepository(repo.Repository):
         super().__init__(
             name="Minicourse", table_name=table_name, bucket_name=bucket_name
         )
+
+        self.set_model(models.Minicourse)
 
     def thumb_put_presigned_url(self, thumb_id: str, expire_time: int) -> str:
         return self.put_presigned_url(self.THUMBNAILS_PATH, thumb_id, expire_time)
