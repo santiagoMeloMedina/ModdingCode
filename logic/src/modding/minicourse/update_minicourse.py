@@ -1,5 +1,4 @@
-import uuid
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 from modding.common import exception, settings, logging, http
 from modding.minicourse import repository, models
 
@@ -39,9 +38,10 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
 
 def build_updated_minicourse(minicourse_id: str, **kwargs) -> models.Minicourse:
     try:
-        minicourse_data = MINICOURSE_REPOSITORY.get_minicourse_by_id(
+        minicourse: models.Minicourse = MINICOURSE_REPOSITORY.get_item_by_id(
             minicourse_id
-        ).dict()
+        )
+        minicourse_data = minicourse.dict()
         minicourse_data.update(**kwargs)
         minicourse_data.update({"id": minicourse_id})
         result = models.Minicourse(**minicourse_data)
@@ -53,5 +53,5 @@ def build_updated_minicourse(minicourse_id: str, **kwargs) -> models.Minicourse:
 
 def update_minicourse(id: str, **kwargs) -> models.Minicourse:
     minicourse = build_updated_minicourse(id, **kwargs)
-    MINICOURSE_REPOSITORY.save_data(minicourse)
+    MINICOURSE_REPOSITORY.save_on_table(minicourse)
     return minicourse
