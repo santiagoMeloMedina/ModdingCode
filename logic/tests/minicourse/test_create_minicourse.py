@@ -13,7 +13,7 @@ _DEFAULT_ENVIRONMENT = {
 
 MOCK_MINICOURSE_DATA = {
     "name": "test_minicourse",
-    "thumb_ext": "png",
+    "ext": ".__-png",
     "category_id": "1",
 }
 MOCK_MINICOURSE_ID = "12341234-413243124"
@@ -28,17 +28,22 @@ MOCK_MINICOURSE_THUMB_UPLOAD_URL = "http://thumb"
 )
 def test_build_minicourse(put_presigned_url: Mock):
     from modding.minicourse import create_minicourse as subject, models
+    from modding.utils import files
 
     mock_minicourse_with_id = {**MOCK_MINICOURSE_DATA, "id": MOCK_MINICOURSE_ID}
 
     minicourse, upload_url = subject.build_and_get_upload_url(**mock_minicourse_with_id)
+
+    mock_minicourse_with_id.update(
+        {"ext": files.clean_extension(mock_minicourse_with_id.get("ext"))}
+    )
 
     assert models.Minicourse(**mock_minicourse_with_id) == minicourse
     assert upload_url == MOCK_MINICOURSE_THUMB_UPLOAD_URL
 
     put_presigned_url.assert_called_once_with(
         "thumbs",
-        f"{MOCK_MINICOURSE_ID}.{minicourse.thumb_ext}",
+        f"{MOCK_MINICOURSE_ID}.{minicourse.ext}",
         300,
     )
 
@@ -57,6 +62,7 @@ def test_create_minicourse(
     put_presigned_url: Mock,
 ):
     from modding.minicourse import create_minicourse as subject, models
+    from modding.utils import files
 
     class AnyStr(str):
         def __eq__(self, *args, **kwargs) -> bool:
@@ -74,7 +80,7 @@ def test_create_minicourse(
     mock_minicourse = models.Minicourse(
         id=AnyStr(),
         category_id=MOCK_CATEGORY.id,
-        thumb_ext=MOCK_MINICOURSE_DATA.get("thumb_ext"),
+        ext=files.clean_extension(MOCK_MINICOURSE_DATA.get("ext")),
         name=MOCK_MINICOURSE_DATA.get("name"),
     )
 

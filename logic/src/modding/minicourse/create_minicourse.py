@@ -51,14 +51,12 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
 
 
 def build_and_get_upload_url(
-    name: str, thumb_ext: str, category_id: str, id: str
+    name: str, ext: str, category_id: str, id: str
 ) -> Tuple[models.Minicourse, str]:
-    thumb_ext = files.clean_extension(thumb_ext)
-    minicourse = models.Minicourse(
-        id=id, name=name, category_id=category_id, thumb_ext=thumb_ext
-    )
+    ext = files.clean_extension(ext)
+    minicourse = models.Minicourse(id=id, name=name, category_id=category_id, ext=ext)
     thumb_upload_url = MINICOURSE_REPOSITORY.thumb_put_presigned_url(
-        f"{minicourse.id}.{thumb_ext}",
+        f"{minicourse.id}.{ext}",
         int(_SETTINGS.thumb_upload_expire_time),
     )
 
@@ -66,13 +64,13 @@ def build_and_get_upload_url(
 
 
 def build_minicourse(
-    name: str, category_id: str, thumb_ext: str
+    name: str, category_id: str, ext: str
 ) -> Tuple[models.Minicourse, str]:
     return id_generator.retrier_with_generator(
         category_id,
         MINICOURSE_ID_LENGTH,
         func=build_and_get_upload_url,
-        params=([], {"name": name, "thumb_ext": thumb_ext, "category_id": category_id}),
+        params=([], {"name": name, "ext": ext, "category_id": category_id}),
         tries=MAX_NUMBER_TRIES,
         logging_method=_LOGGER.warning,
         failed_message="Thumb upload url could not be generated",
@@ -80,10 +78,10 @@ def build_minicourse(
 
 
 def create_minicourse(
-    name: str, category_id: str, thumb_ext: str, **kwargs
+    name: str, category_id: str, ext: str, **kwargs
 ) -> Tuple[models.Minicourse, str]:
     category: models.Category = CATEGORY_REPOSITORY.get_item_by_id(category_id)
-    minicourse, thumb_upload_url = build_minicourse(name, category.id, thumb_ext)
+    minicourse, thumb_upload_url = build_minicourse(name, category.id, ext)
     if minicourse is not None and thumb_upload_url is not None:
         MINICOURSE_REPOSITORY.save_on_table(minicourse)
     else:

@@ -12,3 +12,5 @@ logic/assets
 logic/artifacts
 
 .DS_Store
+
+settings.json

@@ -36,7 +36,7 @@ def test_get_single_minicourse(
     from modding.minicourse import get_minicourse as subject, models
 
     MOCK_MINICOURSE = models.Minicourse(
-        id=MOCK_MINICOURSE_ID, name=AnyStr(), category_id=AnyStr(), thumb_ext=AnyStr()
+        id=MOCK_MINICOURSE_ID, name=AnyStr(), category_id=AnyStr(), ext=AnyStr()
     )
 
     minicourse_get_item_by_id.return_value = MOCK_MINICOURSE
@@ -63,7 +63,7 @@ def test_get_single_minicourse_no_thumbnail(
     from modding.minicourse import get_minicourse as subject, models
 
     MOCK_MINICOURSE = models.Minicourse(
-        id=MOCK_MINICOURSE_ID, name=AnyStr(), category_id=AnyStr(), thumb_ext=AnyStr()
+        id=MOCK_MINICOURSE_ID, name=AnyStr(), category_id=AnyStr(), ext=AnyStr()
     )
 
     minicourse_get_item_by_id.return_value = MOCK_MINICOURSE

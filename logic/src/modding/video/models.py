@@ -1,8 +1,7 @@
-import pydantic
-from modding.video.utils import date_format
+from modding.common import model
 
 
-class Video(pydantic.BaseModel):
-    id: str
+class Video(model.Model):
     name: str
-    date: int = date_format.get_now_unix_time()
+    ext: str
+    minicourse_id: str

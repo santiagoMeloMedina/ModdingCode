@@ -8,4 +8,4 @@ class Category(model.Model):
 class Minicourse(model.Model):
     category_id: str
     name: str
-    thumb_ext: str
+    ext: str
