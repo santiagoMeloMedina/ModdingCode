@@ -65,8 +65,10 @@ class Repository:
             raise self.S3PresigningError(e)
         return put_url
 
-    def save_on_table(self, entity_body: model.Model) -> None:
-        if not self.__item_from_table_exists(entity_body):
+    def save_on_table(
+        self, entity_body: model.Model, update: bool = False
+    ) -> model.Model:
+        if update or not self.__item_from_table_exists(entity_body):
             item = entity_body.dict()
             creation_date = date.get_unix_time_from_now()
             item.update(
@@ -76,5 +78,6 @@ class Repository:
                 }
             )
             self.table.put_item(item)
+            return self.__model.parse_obj(item)
         else:
             raise self.NotSavingIdAlreadyExistsOnTableException(entity_body.id)

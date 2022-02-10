@@ -100,4 +100,4 @@ def test_update_minicourse_save(
 
     updated_minicourse = subject.update_minicourse(MOCK_MINICOURSE_ID)
 
-    save_on_table.assert_called_once_with(mock_minicourse)
+    save_on_table.assert_called_once_with(mock_minicourse, update=True)

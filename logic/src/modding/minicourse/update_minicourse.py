@@ -53,5 +53,5 @@ def build_updated_minicourse(minicourse_id: str, **kwargs) -> models.Minicourse:
 
 def update_minicourse(id: str, **kwargs) -> models.Minicourse:
     minicourse = build_updated_minicourse(id, **kwargs)
-    MINICOURSE_REPOSITORY.save_on_table(minicourse)
+    MINICOURSE_REPOSITORY.save_on_table(minicourse, update=True)
     return minicourse
