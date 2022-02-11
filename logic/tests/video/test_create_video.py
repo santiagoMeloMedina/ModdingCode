@@ -32,7 +32,11 @@ def test_build(put_presigned_url: Mock):
     from modding.video import create_video as subject, models
     from modding.utils import files
 
-    mock_video_data = {**MOCK_VIDEO_DATA, "id": MOCK_VIDEO_ID}
+    mock_video_data = {
+        **MOCK_VIDEO_DATA,
+        "id": MOCK_VIDEO_ID,
+        "section": models.VideoSections.CONTEXT,
+    }
 
     video, upload_url = subject.build(**mock_video_data)
 
@@ -58,7 +62,12 @@ def test_build_with_generator(put_presigned_url: Mock):
     from modding.video import create_video as subject, models
     from modding.utils import files
 
-    video, upload_url = subject.build_video_and_upload_url(**MOCK_VIDEO_DATA)
+    video, upload_url = subject.build_video_and_upload_url(
+        **{
+            **MOCK_VIDEO_DATA,
+            "section": models.VideoSections.CONTEXT,
+        }
+    )
 
     assert len(video.id) > 0
     assert video.id.startswith(video.minicourse_id)
@@ -68,6 +77,7 @@ def test_build_with_generator(put_presigned_url: Mock):
         name=MOCK_VIDEO_DATA.get("name"),
         ext=files.clean_extension(MOCK_VIDEO_DATA.get("ext")),
         minicourse_id=MOCK_VIDEO_DATA.get("minicourse_id"),
+        section=models.VideoSections.CONTEXT,
     )
 
     assert mock_video == video
@@ -85,13 +95,19 @@ def test_create_video(save_on_table: Mock, put_presigned_url: Mock):
     from modding.video import create_video as subject, models
     from modding.utils import files
 
-    result = subject.create_video(**MOCK_VIDEO_DATA)
+    result = subject.create_video(
+        **{
+            **MOCK_VIDEO_DATA,
+            "section": models.VideoSections.CONTEXT,
+        }
+    )
 
     mock_video = models.Video(
         id=AnyStr(),
         name=MOCK_VIDEO_DATA.get("name"),
         ext=files.clean_extension(MOCK_VIDEO_DATA.get("ext")),
         minicourse_id=MOCK_VIDEO_DATA.get("minicourse_id"),
+        section=models.VideoSections.CONTEXT,
     )
 
     assert "video" in result

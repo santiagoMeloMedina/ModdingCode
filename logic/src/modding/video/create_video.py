@@ -36,9 +36,17 @@ def handler(event: Dict[str, Any], context: Any) -> None:
     return response
 
 
-def build(minicourse_id: str, name: str, id: str, ext: str) -> Tuple[models.Video, str]:
+def build(
+    minicourse_id: str, name: str, id: str, ext: str, section: str
+) -> Tuple[models.Video, str]:
     video_ext = files.clean_extension(ext)
-    video = models.Video(id=id, name=name, ext=video_ext, minicourse_id=minicourse_id)
+    video = models.Video(
+        id=id,
+        name=name,
+        ext=video_ext,
+        minicourse_id=minicourse_id,
+        section=models.VideoSections(section),
+    )
     upload_url = _VIDEO_REPOSITORY.video_presigned_url(
         f"{video.id}.{video_ext}", int(_SETTINGS.upload_expire_time)
     )
@@ -46,13 +54,21 @@ def build(minicourse_id: str, name: str, id: str, ext: str) -> Tuple[models.Vide
 
 
 def build_video_and_upload_url(
-    minicourse_id: str, name: str, ext: str
+    minicourse_id: str, name: str, ext: str, section: str
 ) -> Tuple[models.Video, str]:
     return id_generator.retrier_with_generator(
         minicourse_id,
         VIDEO_ID_LENGTH,
         func=build,
-        params=([], {"name": name, "minicourse_id": minicourse_id, "ext": ext}),
+        params=(
+            [],
+            {
+                "name": name,
+                "minicourse_id": minicourse_id,
+                "ext": ext,
+                "section": section,
+            },
+        ),
         tries=MAX_NUMBER_TRIES,
         logging_method=_LOGGER.warning,
         failed_message="Video upload url could not be generated",
