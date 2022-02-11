@@ -1,7 +1,9 @@
 from typing import Any, Dict
+
 from modding.problem import models, repository
 from modding.utils import id_generator
 from modding.common import settings, logging, http
+from modding.minicourse import repository as minicourse_repository
 
 
 class _Settings(settings.Settings):
@@ -17,10 +19,15 @@ BUILD_PROBLEM_MAX_TRIES = 2
 
 
 PROBLEM_REPOSITORY = repository.ProblemRepository(
-    _SETTINGS.problem_table_name,
-    _SETTINGS.problem_bucket_name,
-    _SETTINGS.minicourse_table_name,
+    table_name=_SETTINGS.problem_table_name, bucket_name=_SETTINGS.problem_bucket_name
 )
+
+MINICOURSE_REPOSITORY = minicourse_repository.MinicourseRepository(
+    table_name=_SETTINGS.minicourse_table_name
+)
+
+
+PROBLEM_ID_LENGTH = 10
 
 
 def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
@@ -40,28 +47,34 @@ def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
     return response
 
 
-def build(body: Dict[str, Any], id: str) -> models.Problem:
-    body.update({"id": id, "status": models.ProblemStatus.CREATED})
-    result = models.Problem.parse_obj(body)
+def build(problem_data: Dict[str, Any], id: str) -> models.Problem:
+    problem_data.update({"id": id, "status": models.ProblemStatus.CREATED})
+    result = models.Problem.parse_obj(problem_data)
     return result
 
 
-def build_problem(body: Dict[str, Any]) -> models.Problem:
-    result = None
-    if "name" in body and "minicourse_id" in body:
-        PROBLEM_REPOSITORY.get_minicourse_by_id(minicourse_id=body.get("minicourse_id"))
-        result = id_generator.retrier_with_generator(
-            body.get("name"),
-            func=build,
-            params=([], {"body": body}),
-            tries=BUILD_PROBLEM_MAX_TRIES,
-            logging_method=_LOGGER.warning,
-            failed_message="Could not build problem",
-        )
+def build_problem(minicourse_id: str, name: str, difficulty: int) -> models.Problem:
+    problem_data = {
+        "minicourse_id": minicourse_id,
+        "name": name,
+        "difficulty": difficulty,
+    }
+    result = id_generator.retrier_with_generator(
+        minicourse_id,
+        PROBLEM_ID_LENGTH,
+        func=build,
+        params=(
+            [],
+            {"problem_data": problem_data},
+        ),
+        tries=BUILD_PROBLEM_MAX_TRIES,
+        logging_method=_LOGGER.warning,
+        failed_message="Could not build problem",
+    )
     return result
 
 
-def create_problem(problem_body: Dict[str, Any], **kwargs: Any) -> models.Problem:
-    problem = build_problem(body=problem_body)
+def create_problem(**kwargs: Any) -> models.Problem:
+    problem = build_problem(**kwargs)
     PROBLEM_REPOSITORY.save_on_table(problem)
     return problem

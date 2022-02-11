@@ -21,7 +21,6 @@ class ProblemTestCase(model.Model):
 
 
 class Problem(model.Model):
-    id: str
     name: str
     minicourse_id: str
     description: Optional[ProblemDescription]

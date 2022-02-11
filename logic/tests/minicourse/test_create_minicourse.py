@@ -72,7 +72,7 @@ def test_create_minicourse(
         def __eq__(self, *args, **kwargs) -> bool:
             return True
 
-    MOCK_CATEGORY = models.Category(id="cat1", name="category1")
+    MOCK_CATEGORY = models.Category(id="cat1", name="category1", description="any")
 
     category_get_item_by_id.return_value = MOCK_CATEGORY
 
@@ -107,7 +107,7 @@ def test_handler(
 ):
     from modding.minicourse import create_minicourse as subject, models
 
-    MOCK_CATEGORY = models.Category(id="cat1", name="category1")
+    MOCK_CATEGORY = models.Category(id="cat1", name="category1", description="any")
 
     category_get_item_by_id.return_value = MOCK_CATEGORY
 
