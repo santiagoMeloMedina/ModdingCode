@@ -44,7 +44,7 @@ def test_evaluate() -> None:
     )
 
     assert evaluation.id == MOCK_PROBLEM_EVALUATION_ID
-    assert evaluation.veredict == models.ProblemVeredict.SENT
+    assert evaluation.veredict == models.ProblemVeredict.SENT.value
     assert evaluation.username == MOCK_PROBLEM_EVALUATION.get("username")
     assert evaluation.problem_id == MOCK_PROBLEM_EVALUATION.get("problem_id")
 
