@@ -68,15 +68,21 @@ class Repository:
     def save_on_table(self, entity_body: model.Model, update: bool = False) -> None:
         if update or not self.__item_from_table_exists(entity_body):
             item = entity_body.dict()
-            creation_date = date.get_unix_time_from_now()
+            current_date = date.get_unix_time_from_now()
             item.update(
                 {
-                    "creation_date": creation_date,
-                    "id": f"{entity_body.id}-{creation_date}",
+                    **(
+                        {
+                            "creation_date": current_date,
+                            "id": f"{entity_body.id}-{current_date}",
+                        }
+                        if not update
+                        else {"updated_date": current_date}
+                    ),
                 }
             )
             self.table.put_item(item)
             entity_body.id = item.get("id")
-            entity_body.creation_date = creation_date
+            entity_body.creation_date = current_date
         else:
             raise self.NotSavingIdAlreadyExistsOnTableException(entity_body.id)

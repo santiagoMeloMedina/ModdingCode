@@ -1,13 +1,26 @@
+import enum
 from typing import Optional
 import pydantic
 
 
-class Model(pydantic.BaseModel):
+class DataState(enum.Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+
+
+class CommonModel(pydantic.BaseModel):
     id: str
+    creation_date: Optional[str]
+    updated_date: Optional[str]
+    data_state: DataState = DataState.ACTIVE
+
+    class Config:
+        use_enum_values = True
+
+
+class Model(CommonModel):
     visible: bool = False
-    creation_date: Optional[str]
 
 
-class ModelShown(pydantic.BaseModel):
+class ModelShown(CommonModel):
     id: str
-    creation_date: Optional[str]
