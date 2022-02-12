@@ -1,4 +1,3 @@
-from typing import Any, Dict
 from modding.common import exception, aws_cli, model
 from modding.utils import date
 
@@ -18,6 +17,18 @@ class Repository:
                 "Could not save id %s because already exists in table" % (id)
             )
 
+    class UpdatingNotExistentEntity(exception.LoggingException):
+        def __init__(self, id: str):
+            super().__init__(
+                "Could not update id %s because it does not exist in table" % (id)
+            )
+
+    class DeletingNotExistentEntity(exception.LoggingException):
+        def __init__(self, id: str):
+            super().__init__(
+                "Could not delete id %s because it does not exist in table" % (id)
+            )
+
     class S3PresigningError(exception.LoggingErrorException):
         def __init__(self, message: str):
             super().__init__("Can not get presigned url, %s" % (message))
@@ -34,9 +45,9 @@ class Repository:
     def set_model(self, _model: model.Model) -> None:
         self.__model = _model
 
-    def __item_from_table_exists(self, entity_body: model.Model) -> bool:
-        item = self.table.get_item({"id": entity_body.id})
-        return item is not None
+    def __get_item_by_id_no_exception(self, id: str) -> model.Model:
+        item = self.table.get_item({"id": id})
+        return self.__model.parse_obj(item) if item is not None else None
 
     def get_item_by_id(self, id: str) -> model.Model:
         item = self.table.get_item({"id": id})
@@ -66,8 +77,9 @@ class Repository:
         return put_url
 
     def save_on_table(self, entity_body: model.Model, update: bool = False) -> None:
-        if update or not self.__item_from_table_exists(entity_body):
-            item = entity_body.dict()
+        entity = self.__get_item_by_id_no_exception(entity_body.id)
+        if (update and entity) or not entity:
+            item = (entity_body if not update else entity).dict()
             current_date = date.get_unix_time_from_now()
             item.update(
                 {
@@ -84,5 +96,16 @@ class Repository:
             self.table.put_item(item)
             entity_body.id = item.get("id")
             entity_body.creation_date = current_date
+        elif update and not entity:
+            raise self.UpdatingNotExistentEntity(entity_body.id)
         else:
             raise self.NotSavingIdAlreadyExistsOnTableException(entity_body.id)
+
+    def delete_data(self, id: str) -> None:
+        entity = self.__get_item_by_id_no_exception(id)
+        if entity:
+            item = entity.dict()
+            item.update({"data_state": model.DataState.INACTIVE})
+            self.table.put_item(item)
+        else:
+            raise self.DeletingNotExistentEntity(id)
