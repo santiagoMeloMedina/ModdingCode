@@ -1,5 +1,6 @@
 import enum
 from typing import List, Optional
+
 from modding.common import model
 
 
@@ -38,7 +39,10 @@ class ProblemVeredict(enum.Enum):
     SOLVED = "SOLVED"
 
 
-class ProblemEvaluation(model.Model):
+class ProblemEvaluation(model.ModelShown):
     problem_id: str
     username: str
     veredict: ProblemVeredict
+
+    class Config:
+        use_enum_values = True

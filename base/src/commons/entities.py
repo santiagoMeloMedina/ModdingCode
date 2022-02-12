@@ -1,4 +1,5 @@
-from types import MethodType
+import re
+
 from typing import Any, Dict, Optional
 from aws_cdk import (
     core,
@@ -53,7 +54,8 @@ class Table(_dynamodb.Table):
         self.entity_name = entity_name
 
     def get_env_name_var(self) -> Dict[str, Any]:
-        return {f"{self.entity_name.upper()}_TABLE_NAME": self.table_name}
+        separated = "_".join(re.findall("[A-Z][^A-Z]*", self.entity_name))
+        return {f"{separated.upper()}_TABLE_NAME": self.table_name}
 
     def add_secundary_index(
         self, partition_key: _dynamodb.Attribute, sort_key: _dynamodb.Attribute = None
