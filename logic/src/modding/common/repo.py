@@ -33,6 +33,8 @@ class Repository:
         def __init__(self, message: str):
             super().__init__("Can not get presigned url, %s" % (message))
 
+    EQUAL_COMPARISON = "eq"
+
     def __init__(self, name: str, table_name: str, bucket_name: str) -> None:
         self.NotFoundEntityException = lambda entity_id: self._NotFoundEntityException(
             id=entity_id, entity=name
@@ -46,13 +48,16 @@ class Repository:
         self.__model = _model
 
     def __get_item_by_id_no_exception(self, id: str) -> model.Model:
-        item = self.table.get_item({"id": id})
+        item = self.table.get_item(
+            {"id": id},
+            {"data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value)},
+        )
         return self.__model.parse_obj(item) if item is not None else None
 
     def get_item_by_id(self, id: str) -> model.Model:
-        item = self.table.get_item({"id": id})
+        item = self.__get_item_by_id_no_exception(id)
         if item is not None:
-            return self.__model.parse_obj(item)
+            return item
         else:
             raise self.NotFoundEntityException(id)
 

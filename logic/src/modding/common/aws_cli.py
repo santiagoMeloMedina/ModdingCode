@@ -1,5 +1,6 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import boto3
+from boto3.dynamodb.conditions import Key, Attr, ComparisonCondition
 
 
 class AwsCustomClient:
@@ -38,7 +39,44 @@ class AwsCustomClient:
             self.resource = boto3.resource("dynamodb")
             self.table = self.resource.Table(table_name)
 
-        def get_item(self, values: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        def query_items(
+            self, keys: Dict[str, Any], filters: Dict[str, Tuple[str, str]]
+        ) -> Optional[Dict[str, Any]]:
+            key_conditions = None
+            filter_conditions = None
+            for key in keys:
+                value = keys[key]
+                condition = Key(key).eq(value)
+                if key_conditions:
+                    key_conditions = key_conditions & condition
+                else:
+                    key_conditions = condition
+
+            for filter in filters:
+                comparison, value = filters[filter]
+                operator: ComparisonCondition = getattr(Attr(filter), comparison)
+                condition = operator(value)
+                if filter_conditions:
+                    filter_conditions &= condition
+                else:
+                    filter_conditions = condition
+
+            params = {
+                "KeyConditionExpression": key_conditions,
+                "FilterExpression": filter_conditions,
+            }
+
+            return self.table.query(**params).get("Items") or None
+
+        def get_item(
+            self, keys: Dict[str, Any], filters: Dict[str, Tuple[str, str]]
+        ) -> Optional[Dict[str, Any]]:
+            response = self.query_items(keys, filters)
+            return response[0] if response else None
+
+        def get_item_no_filters(
+            self, values: Dict[str, Any]
+        ) -> Optional[Dict[str, Any]]:
             return self.table.get_item(Key=values).get("Item") or None
 
         def put_item(self, item: Dict[str, Any]) -> None:
