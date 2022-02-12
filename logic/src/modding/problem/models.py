@@ -30,3 +30,15 @@ class Problem(model.Model):
 
     class Config:
         use_enum_values = True
+
+
+class ProblemVeredict(enum.Enum):
+    SENT = "SENT"
+    FAILED = "FAILED"
+    SOLVED = "SOLVED"
+
+
+class ProblemEvaluation(model.Model):
+    problem_id: str
+    username: str
+    veredict: ProblemVeredict

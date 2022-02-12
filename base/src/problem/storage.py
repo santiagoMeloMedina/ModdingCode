@@ -32,3 +32,18 @@ class ProblemTable(entities.Table):
         self.add_secundary_index(
             partition_key=Attribute(name="minicourse_id", type=AttributeType.STRING)
         )
+
+
+@injector
+class ProblemEvaluationTable(entities.Table):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            entity_name="ProblemEvaluation",
+            partition_key=Attribute(name="id", type=AttributeType.STRING),
+        )
+
+        self.add_secundary_index(
+            partition_key=Attribute(name="username", type=AttributeType.STRING),
+            sort_key=Attribute(name="problem_id", type=AttributeType.STRING),
+        )

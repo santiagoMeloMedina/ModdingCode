@@ -7,7 +7,10 @@ from src.problem import stack, lambdas
 @injector
 class ProblemRestApi(entities.LambdaRestApi):
     def __init__(
-        self, scope: stack.ProblemStack, create_problem: lambdas.CreateProblemLambda
+        self,
+        scope: stack.ProblemStack,
+        create_problem: lambdas.CreateProblemLambda,
+        evaluate_problem: lambdas.CreateProblemEvaluationLambda,
     ):
         super().__init__(scope=scope, id="ProblemRestApi", name="ProblemRestApi")
 
@@ -17,4 +20,12 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.main_resource,
             method=HttpMethods.POST,
             integration_lambda=create_problem,
+        )
+
+        self.evaluation_resource = self.main_resource.add_resource("evaluation")
+
+        self.add_method(
+            self.evaluation_resource,
+            method=HttpMethods.POST,
+            integration_lambda=evaluate_problem,
         )

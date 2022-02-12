@@ -27,3 +27,25 @@ class CreateProblemLambda(entities.Lambda):
         self.grant_table(table=problem_table, read=True, write=True)
         self.grant_table(table=minicourse_table, read=True, write=True)
         self.grant_bucket(problem_bucket, read=True, write=True)
+
+
+@injector
+class CreateProblemEvaluationLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        problem_table: storage.ProblemTable,
+        problem_evaluation_table: storage.ProblemEvaluationTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="CreateProblemEvaluationLambda",
+            source="modding/problem/evaluation/evaluate_problem",
+            env={
+                **problem_table.get_env_name_var(),
+                **problem_evaluation_table.get_env_name_var(),
+            },
+        )
+
+        self.grant_table(table=problem_table, read=True, write=True)
+        self.grant_table(table=problem_evaluation_table, read=True, write=True)
