@@ -88,7 +88,10 @@ class Repository:
     def save_on_table(self, entity_body: model.Model, update: bool = False) -> None:
         entity = self.__get_item_by_id_no_exception(entity_body.id)
         if (update and entity) or not entity:
-            item = (entity_body if not update else entity).dict()
+            item = entity_body.dict()
+            if update:
+                item = entity.dict()
+                item.update(entity_body.dict())
             current_date = date.get_unix_time_from_now()
             item.update(
                 {

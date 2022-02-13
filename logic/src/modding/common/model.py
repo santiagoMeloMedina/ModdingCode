@@ -10,8 +10,8 @@ class DataState(enum.Enum):
 
 class CommonModel(pydantic.BaseModel):
     id: str
-    creation_date: Optional[str]
-    updated_date: Optional[str]
+    creation_date: Optional[int]
+    updated_date: Optional[int]
     data_state: DataState = DataState.ACTIVE
     username: Optional[str]
 
