@@ -107,35 +107,32 @@ class Repository:
             raise self.S3PresigningError(e)
         return put_url
 
-    def save_on_table(self, entity_body: model.Model, update: bool = False) -> None:
-        entity = self.__get_item_by_id_no_exception(entity_body.id)
-        if (update and entity) or not entity:
-            item = entity_body.dict()
-            if update:
-                item = entity.dict()
-                item.update(entity_body.dict())
-            current_date = date.get_unix_time_from_now()
-            item.update(
-                {
-                    **(
-                        {
-                            "creation_date": current_date,
-                            "id": f"{entity_body.id}-{current_date}",
-                        }
-                        if not update
-                        else {"updated_date": current_date}
-                    ),
-                    **({"username": self._username} if self._username else {}),
-                }
-            )
-            self.table.put_item(item)
-            entity_body.id = item.get("id")
-            entity_body.creation_date = current_date
-            entity_body.username = self._username
-        elif update and not entity:
-            raise self.UpdatingNotExistentEntity(entity_body.id)
+    def _create_data(self, entity: model.Model, current_date: int) -> None:
+        extra_creation_data = {
+            "id": f"{entity.id}-{current_date}",
+            "creation_date": current_date,
+            "username": self._username,
+        }
+        item = entity.dict()
+        item.update(extra_creation_data)
+        self.table.put_item(item)
+        entity.id = extra_creation_data.get("id")
+        entity.creation_date = extra_creation_data.get("creation_date")
+        entity.username = extra_creation_data.get("username")
+
+    def _update_data(self, entity: model.Model, current_date: int) -> None:
+        extra_update_data = {"updated_date": current_date}
+        item = entity.dict()
+        item.update(extra_update_data)
+        self.table.put_item(item)
+        entity.updated_date = extra_update_data.get("updated_date")
+
+    def save_on_table(self, entity: model.Model, update: bool = False) -> None:
+        current_date = date.get_unix_time_from_now()
+        if update:
+            self._update_data(entity, current_date)
         else:
-            raise self.NotSavingIdAlreadyExistsOnTableException(entity_body.id)
+            self._create_data(entity, current_date)
 
     def delete_data(self, id: str) -> None:
         entity = self.__get_item_by_id_no_exception(id)
