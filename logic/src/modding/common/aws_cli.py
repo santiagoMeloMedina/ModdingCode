@@ -1,9 +1,92 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 import boto3
+import json
 from boto3.dynamodb.conditions import Key, Attr, ComparisonCondition
+import pydantic
+from modding.common import repo, exception
+from modding.utils import jwt
 
 
 class AwsCustomClient:
+    class ApiGateway:
+        class NoAuthorizationHeader(exception.LoggingErrorException):
+            def __init__(self):
+                super().__init__("There was no authorization header on headers")
+
+        class AGWEvent(pydantic.BaseModel):
+            body: Dict[str, Any]
+            headers: Dict[str, Any]
+
+        REPO_ACTION = "repo"
+
+        AUTH_HEADER_NAME = "Authorization"
+
+        @classmethod
+        def __parse_event(cls, event: Dict[str, Any]) -> AGWEvent:
+            parsed = cls.AGWEvent(
+                body=json.loads(event.get("body", "{}")),
+                headers=event.get("headers", dict()),
+            )
+            return parsed
+
+        @classmethod
+        def __decode_header_auth_token(cls, headers: Dict[str, Any]) -> Dict[str, Any]:
+            if cls.AUTH_HEADER_NAME in headers:
+                auth_value = headers.get(cls.AUTH_HEADER_NAME)
+                token = jwt.obtain_token_from_bearer(auth_value)
+                return jwt.decode_hs256_token_no_verify(token)
+            else:
+                raise cls.NoAuthorizationHeader()
+
+        @staticmethod
+        def __set_username_on_repos(*repositories: repo.Repository, username: str):
+            for repository in repositories:
+                repository.set_username(username)
+
+        @classmethod
+        def include_repos_action(
+            cls,
+            *repositories: repo.Repository,
+        ):
+            ### This is an action method to set username from token
+            ### on repositories
+
+            return {cls.REPO_ACTION: repositories}
+
+        @classmethod
+        def __token_actions(cls, headers: Dict[str, Any], **kwargs):
+            ### This method will deal with the included decorated
+            ### actions that need data from auth token
+
+            actions = {cls.REPO_ACTION: cls.__set_username_on_repos}
+
+            if any([key in actions for key in kwargs]):
+                payload = cls.__decode_header_auth_token(headers)
+
+                def dummy_method(*args, **kwargs):
+                    pass
+
+                for key in kwargs:
+                    actions.get(key, dummy_method)(*kwargs.get(key), **payload)
+
+        @classmethod
+        def pre_handler(
+            cls, handler: Callable[[Dict[str, Any], Dict[str, Any]], Any]
+        ) -> Any:
+            ## This decorator method will take the handle and use the parsed
+            ## apigateway event for different actions like injecting data from
+            ## events on different objects.
+
+            def wrapper(*args, **kwargs) -> Any:
+                parsed_event = cls.__parse_event(args[0])
+
+                cls.__token_actions(parsed_event.headers, **kwargs)
+
+                handled = handler(parsed_event, args[1])
+                return handled
+
+            return wrapper
+
     class S3:
         PUT_EXPIRE_TIME = 300
 

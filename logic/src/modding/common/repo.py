@@ -43,13 +43,13 @@ class Repository:
         self.table = aws_cli.AwsCustomClient.dynamo(table_name)
         self.s3 = aws_cli.AwsCustomClient.s3(bucket_name)
         self.__model: model.Model = model.Model
-        self.__username: str = None
+        self._username: str = None
 
     def set_model(self, _model: model.Model) -> None:
         self.__model = _model
 
     def set_username(self, username: str) -> None:
-        self.__username = username
+        self._username = username
 
     def __get_item_by_id_no_exception(self, id: str) -> model.Model:
         item = self.table.get_item(
@@ -100,7 +100,7 @@ class Repository:
                         if not update
                         else {"updated_date": current_date}
                     ),
-                    **({"username": self.__username} if self.__username else {}),
+                    **({"username": self._username} if self._username else {}),
                 }
             )
             self.table.put_item(item)

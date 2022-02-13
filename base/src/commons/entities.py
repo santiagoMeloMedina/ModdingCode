@@ -39,7 +39,9 @@ class Table(_dynamodb.Table):
         scope: core.Stack,
         entity_name: str,
         partition_key: _dynamodb.Attribute,
-        sort_key: Optional[_dynamodb.Attribute] = None,
+        sort_key: Optional[_dynamodb.Attribute] = _dynamodb.Attribute(
+            name="username", type=_dynamodb.AttributeType.STRING
+        ),
     ):
         super().__init__(
             scope=scope,
