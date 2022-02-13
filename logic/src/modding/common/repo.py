@@ -106,6 +106,7 @@ class Repository:
             self.table.put_item(item)
             entity_body.id = item.get("id")
             entity_body.creation_date = current_date
+            entity_body.username = self._username
         elif update and not entity:
             raise self.UpdatingNotExistentEntity(entity_body.id)
         else:

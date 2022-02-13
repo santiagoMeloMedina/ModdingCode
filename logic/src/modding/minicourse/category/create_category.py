@@ -2,8 +2,9 @@ from typing import Any, Dict
 
 from modding.minicourse.category import repository
 from modding.minicourse import models
-from modding.utils import id_generator
+from modding.utils import id_generator, function
 from modding.common import settings, logging, http
+from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
 class _Settings(settings.Settings):
@@ -22,11 +23,13 @@ CATEGORY_REPOSITORY = repository.CategoryRepository(
 )
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
+@function.decorator_builder(
+    aws_client.ApiGateway.include_repos_action, CATEGORY_REPOSITORY
+)
+@aws_client.ApiGateway.pre_handler
+def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]) -> Any:
     try:
-        body = http.parse_body(event)
-
-        created = create_category(**body)
+        created = create_category(**event.body)
 
         response = http.get_response(http.HttpCodes.SUCCESS, body=created.dict())
 

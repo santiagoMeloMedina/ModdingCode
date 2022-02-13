@@ -3,7 +3,7 @@ import boto3
 import json
 from boto3.dynamodb.conditions import Key, Attr, ComparisonCondition
 import pydantic
-from modding.common import repo, exception
+from modding.common import exception
 from modding.utils import jwt
 
 
@@ -39,15 +39,12 @@ class AwsCustomClient:
                 raise cls.NoAuthorizationHeader()
 
         @staticmethod
-        def __set_username_on_repos(*repositories: repo.Repository, username: str):
+        def __set_username_on_repos(*repositories: Any, username: str):
             for repository in repositories:
                 repository.set_username(username)
 
         @classmethod
-        def include_repos_action(
-            cls,
-            *repositories: repo.Repository,
-        ):
+        def include_repos_action(cls, *repositories: Any):
             ### This is an action method to set username from token
             ### on repositories
 
