@@ -1,9 +1,10 @@
 from typing import Any, Dict
 
 from modding.problem import models, repository
-from modding.utils import id_generator
+from modding.utils import id_generator, function
 from modding.common import settings, logging, http
 from modding.minicourse import repository as minicourse_repository
+from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
 class _Settings(settings.Settings):
@@ -30,11 +31,13 @@ MINICOURSE_REPOSITORY = minicourse_repository.MinicourseRepository(
 PROBLEM_ID_LENGTH = 10
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
+@function.decorator_builder(
+    aws_client.ApiGateway.include_repos_action, PROBLEM_REPOSITORY
+)
+@aws_client.ApiGateway.pre_handler
+def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]) -> Any:
     try:
-        body = http.parse_body(event)
-
-        created_problem = create_problem(**body)
+        created_problem = create_problem(**event.body)
 
         response = http.get_response(
             http.HttpCodes.SUCCESS, body=created_problem.dict()
@@ -54,13 +57,14 @@ def build(problem_data: Dict[str, Any], id: str) -> models.Problem:
 
 
 def build_problem(minicourse_id: str, name: str, difficulty: int) -> models.Problem:
+    minicourse = MINICOURSE_REPOSITORY.get_item_by_id(minicourse_id)
     problem_data = {
-        "minicourse_id": minicourse_id,
+        "minicourse_id": minicourse.id,
         "name": name,
         "difficulty": difficulty,
     }
     result = id_generator.retrier_with_generator(
-        minicourse_id,
+        minicourse.id,
         PROBLEM_ID_LENGTH,
         func=build,
         params=(

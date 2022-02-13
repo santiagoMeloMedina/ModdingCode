@@ -1,8 +1,9 @@
 from typing import Any, Dict, Tuple
 from modding.common import exception, settings, logging, http
 from modding.minicourse import repository, models
-from modding.utils import id_generator, files
+from modding.utils import id_generator, files, function
 from modding.minicourse.category import repository as category_repository
+from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
 class _Settings(settings.Settings):
@@ -32,11 +33,13 @@ class MinicourseNotBuilt(exception.LoggingErrorException):
         super().__init__("Minicourse could not be built")
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
+@function.decorator_builder(
+    aws_client.ApiGateway.include_repos_action, MINICOURSE_REPOSITORY
+)
+@aws_client.ApiGateway.pre_handler
+def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]) -> Any:
     try:
-        body = http.parse_body(event)
-
-        created_minicourse, thumb_upload_url = create_minicourse(**body)
+        created_minicourse, thumb_upload_url = create_minicourse(**event.body)
 
         response = http.get_response(
             http.HttpCodes.SUCCESS,

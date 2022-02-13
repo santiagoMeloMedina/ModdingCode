@@ -1,7 +1,8 @@
 from typing import Any, Dict, List
 from modding.common import http, logging, settings, exception
 from modding.minicourse import repository, models
-from modding.utils import files
+from modding.utils import files, function
+from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
 class _Settings(settings.Settings):
@@ -27,10 +28,13 @@ class TooManyMinicoursesRetrival(exception.LoggingErrorException):
         super().__init__("Too many minicourses to retrieve at once")
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]):
+@function.decorator_builder(
+    aws_client.ApiGateway.include_repos_action, MINICOURSE_REPOSITORY
+)
+@aws_client.ApiGateway.pre_handler
+def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]):
     try:
-        body = http.parse_body(event)
-        result = actions(**body)
+        result = actions(**event.body)
 
         response = http.get_response(http.HttpCodes.SUCCESS, body=result)
     except Exception as e:

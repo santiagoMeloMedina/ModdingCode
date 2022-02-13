@@ -1,7 +1,8 @@
 from typing import Any, Dict, Tuple
-from modding.common import logging, settings, exception, http
+from modding.common import logging, settings, http
 from modding.video import repository, models
-from modding.utils import id_generator, files
+from modding.utils import id_generator, files, function
+from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
 class _Settings(settings.Settings):
@@ -23,11 +24,13 @@ _VIDEO_REPOSITORY = repository.VideoRepository(
 )
 
 
-def handler(event: Dict[str, Any], context: Any) -> None:
+@function.decorator_builder(
+    aws_client.ApiGateway.include_repos_action, _VIDEO_REPOSITORY
+)
+@aws_client.ApiGateway.pre_handler
+def handler(event: aws_client.ApiGateway.AGWEvent, context: Any) -> None:
     try:
-        body = http.parse_body(event)
-
-        video_created = create_video(**body)
+        video_created = create_video(**event.body)
 
         response = http.get_response(http.HttpCodes.SUCCESS, video_created)
     except Exception as e:

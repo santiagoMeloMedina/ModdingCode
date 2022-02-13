@@ -2,8 +2,9 @@ from typing import Any, Dict
 
 from modding.problem.evaluation import repository
 from modding.problem import models, repository as problem_repository
-from modding.utils import id_generator
+from modding.utils import id_generator, function
 from modding.common import settings, logging, http, exception
+from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
 class _Settings(settings.Settings):
@@ -34,11 +35,13 @@ class FileInputNotSentError(exception.LoggingException):
         super().__init__("Could not send file input to analizer")
 
 
-def handler(event: Dict[str, Any], context: Dict[str, Any]) -> Any:
+@function.decorator_builder(
+    aws_client.ApiGateway.include_repos_action, PROBLEM_EVALUATION_REPOSITORY
+)
+@aws_client.ApiGateway.pre_handler
+def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]) -> Any:
     try:
-        body = http.parse_body(event)
-
-        evaluated = evaluate_problem(**body)
+        evaluated = evaluate_problem(**event.body)
 
         response = http.get_response(http.HttpCodes.SUCCESS, body=evaluated.dict())
 
