@@ -41,7 +41,7 @@ def handler(event: aws_client.ApiGateway.AGWEvent, context: Any) -> None:
 
 def build(
     minicourse_id: str, name: str, id: str, ext: str, section: str
-) -> Tuple[models.Video, str]:
+) -> models.Video:
     video_ext = files.clean_extension(ext)
     video = models.Video(
         id=id,
@@ -50,15 +50,17 @@ def build(
         minicourse_id=minicourse_id,
         section=models.VideoSections(section),
     )
+    return video
+
+
+def get_upload_url(video: models.Video, **kwargs) -> str:
     upload_url = _VIDEO_REPOSITORY.video_presigned_url(
-        f"{video.id}.{video_ext}", int(_SETTINGS.upload_expire_time)
+        f"{video.id}.{video.ext}", int(_SETTINGS.upload_expire_time)
     )
-    return video, upload_url
+    return upload_url
 
 
-def build_video_and_upload_url(
-    minicourse_id: str, name: str, ext: str, section: str
-) -> Tuple[models.Video, str]:
+def build_video(minicourse_id: str, name: str, ext: str, section: str) -> models.Video:
     return id_generator.retrier_with_generator(
         minicourse_id,
         VIDEO_ID_LENGTH,
@@ -74,12 +76,28 @@ def build_video_and_upload_url(
         ),
         tries=MAX_NUMBER_TRIES,
         logging_method=_LOGGER.warning,
+        failed_message="Video could not be build",
+    )
+
+
+def obtain_upload_url(video: models.Video) -> str:
+    return id_generator.retrier_with_generator(
+        str(),
+        0,
+        func=get_upload_url,
+        params=(
+            [],
+            {"video": video},
+        ),
+        tries=MAX_NUMBER_TRIES,
+        logging_method=_LOGGER.warning,
         failed_message="Video upload url could not be generated",
     )
 
 
 def create_video(**kwargs) -> Dict[str, Any]:
-    video, upload_url = build_video_and_upload_url(**kwargs)
+    video = build_video(**kwargs)
     _VIDEO_REPOSITORY.save_on_table(video)
+    upload_url = obtain_upload_url(video)
     result = {"video": video.dict(), "upload_url": upload_url}
     return result
