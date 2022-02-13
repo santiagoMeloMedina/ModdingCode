@@ -12,6 +12,7 @@ class ProblemRestApi(entities.LambdaRestApi):
         create_problem: lambdas.CreateProblemLambda,
         evaluate_problem: lambdas.CreateProblemEvaluationLambda,
         delete_problem: lambdas.DeleteProblemLambda,
+        update_problem: lambdas.UpdateProblemLambda,
     ):
         super().__init__(scope=scope, id="ProblemRestApi", name="ProblemRestApi")
 
@@ -35,4 +36,10 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.main_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_problem,
+        )
+
+        self.add_method(
+            self.main_resource,
+            method=HttpMethods.PUT,
+            integration_lambda=update_problem,
         )
