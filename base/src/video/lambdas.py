@@ -29,3 +29,22 @@ class CreateVideoLambda(entities.Lambda):
 
         self.grant_table(video_table, read=True, write=True)
         self.grant_bucket(video_bucket, read=True, write=True)
+
+
+@injector
+class DeleteVideoLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: video_stack.VideoStack,
+        video_table: video_storage.VideoTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="DeleteVideoLambda",
+            source="modding/video/delete_video",
+            env={
+                **video_table.get_env_name_var(),
+            },
+        )
+
+        self.grant_table(video_table, read=True, write=True)

@@ -3,7 +3,7 @@ from modding.video import models
 
 
 class VideoRepository(repo.Repository):
-    def __init__(self, table_name: str, bucket_name: str):
+    def __init__(self, table_name: str = str(), bucket_name: str = str()):
         super().__init__("Video", table_name=table_name, bucket_name=bucket_name)
 
         self.set_model(models.Video)

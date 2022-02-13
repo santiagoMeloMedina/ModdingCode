@@ -49,3 +49,20 @@ class CreateProblemEvaluationLambda(entities.Lambda):
 
         self.grant_table(table=problem_table, read=True, write=True)
         self.grant_table(table=problem_evaluation_table, read=True, write=True)
+
+
+@injector
+class DeleteProblemLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        problem_table: storage.ProblemTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="DeleteProblemLambda",
+            source="modding/problem/delete_problem",
+            env={**problem_table.get_env_name_var()},
+        )
+
+        self.grant_table(table=problem_table, read=True, write=True)
