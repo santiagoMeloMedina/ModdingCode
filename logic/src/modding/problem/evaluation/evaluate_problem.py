@@ -65,11 +65,9 @@ def evaluate(
         raise FileInputNotSentError()
 
 
-def build_evaluation(
-    problem_id: str, username: str, file_input: str
-) -> models.ProblemEvaluation:
+def build_evaluation(problem_id: str, file_input: str) -> models.ProblemEvaluation:
     problem = PROBLEM_REPOSITORY.get_item_by_id(problem_id)
-    evaluation_data = {"problem_id": problem.id, "username": username}
+    evaluation_data = {"problem_id": problem.id}
     result = id_generator.retrier_with_generator(
         problem.id,
         EVALUATION_ID_LENGTH,

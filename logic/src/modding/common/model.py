@@ -13,6 +13,7 @@ class CommonModel(pydantic.BaseModel):
     creation_date: Optional[str]
     updated_date: Optional[str]
     data_state: DataState = DataState.ACTIVE
+    username: Optional[str]
 
     class Config:
         use_enum_values = True

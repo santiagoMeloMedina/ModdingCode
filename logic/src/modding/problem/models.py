@@ -16,9 +16,14 @@ class ProblemDescription(model.Model):
     sample_output: Optional[str]
 
 
+class ProblemInputFile(model.Model):
+    id: str
+    name: str
+
+
 class ProblemTestCase(model.Model):
-    input_files: List[str] = list()
-    output_files: List[str] = list()
+    input_files: List[ProblemInputFile] = list()
+    output_files: List[ProblemInputFile] = list()
 
 
 class Problem(model.Model):
@@ -41,7 +46,6 @@ class ProblemVeredict(enum.Enum):
 
 class ProblemEvaluation(model.ModelShown):
     problem_id: str
-    username: str
     veredict: ProblemVeredict
 
     class Config:

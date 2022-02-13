@@ -18,7 +18,7 @@ _DEFAULT_ENVIRONMENT = {
 }
 
 MOCK_PROBLEM_EVALUATION_ID = "prefix-12341"
-MOCK_PROBLEM_EVALUATION = {"problem_id": "problem1", "username": "user1@gmail.com"}
+MOCK_PROBLEM_EVALUATION = {"problem_id": "problem1"}
 
 MOCK_PROBLEM = {
     "id": "min1-veevcf32",
@@ -45,7 +45,6 @@ def test_evaluate() -> None:
 
     assert evaluation.id == MOCK_PROBLEM_EVALUATION_ID
     assert evaluation.veredict == models.ProblemVeredict.SENT.value
-    assert evaluation.username == MOCK_PROBLEM_EVALUATION.get("username")
     assert evaluation.problem_id == MOCK_PROBLEM_EVALUATION.get("problem_id")
 
 
