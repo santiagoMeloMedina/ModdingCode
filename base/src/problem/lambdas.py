@@ -83,3 +83,20 @@ class UpdateProblemLambda(entities.Lambda):
         )
 
         self.grant_table(table=problem_table, read=True, write=True)
+
+
+@injector
+class GetProblemLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        problem_table: storage.ProblemTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="GetProblemLambda",
+            source="modding/problem/get_problem",
+            env={**problem_table.get_env_name_var(), **problem_table.get_index_names()},
+        )
+
+        self.grant_table(table=problem_table, read=True, write=True)

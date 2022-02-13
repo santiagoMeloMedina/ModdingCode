@@ -30,7 +30,9 @@ class ProblemTable(entities.Table):
         )
 
         self.add_secundary_index(
-            partition_key=Attribute(name="minicourse_id", type=AttributeType.STRING)
+            name="ProblemMinicourse",
+            partition_key=Attribute(name="minicourse_id", type=AttributeType.STRING),
+            sort_key=Attribute(name="creation_date", type=AttributeType.NUMBER),
         )
 
 
@@ -44,6 +46,7 @@ class ProblemEvaluationTable(entities.Table):
         )
 
         self.add_secundary_index(
-            partition_key=Attribute(name="username", type=AttributeType.STRING),
-            sort_key=Attribute(name="problem_id", type=AttributeType.STRING),
+            name="EvaluationProblem",
+            partition_key=Attribute(name="problem_id", type=AttributeType.STRING),
+            sort_key=Attribute(name="creation_date", type=AttributeType.NUMBER),
         )

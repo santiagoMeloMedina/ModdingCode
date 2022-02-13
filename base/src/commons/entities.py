@@ -54,13 +54,24 @@ class Table(_dynamodb.Table):
             removal_policy=core.RemovalPolicy.DESTROY,
         )
         self.entity_name = entity_name
+        self.index_names = dict()
 
     def get_env_name_var(self) -> Dict[str, Any]:
         separated = "_".join(re.findall("[A-Z][^A-Z]*", self.entity_name))
         return {f"{separated.upper()}_TABLE_NAME": self.table_name}
 
+    def get_index_names(self) -> Dict[str, Any]:
+        result = dict()
+        for name in self.index_names:
+            separated = "_".join(re.findall("[A-Z][^A-Z]*", name))
+            result[f"{separated.upper()}_INDEX_NAME"] = self.index_names[name]
+        return result
+
     def add_secundary_index(
-        self, partition_key: _dynamodb.Attribute, sort_key: _dynamodb.Attribute = None
+        self,
+        name: str,
+        partition_key: _dynamodb.Attribute,
+        sort_key: _dynamodb.Attribute = None,
     ) -> None:
         index_name = (
             f"{partition_key.name}{f'_{sort_key.name}' if sort_key else ''}_index"
@@ -68,6 +79,7 @@ class Table(_dynamodb.Table):
         self.add_global_secondary_index(
             index_name=index_name, partition_key=partition_key, sort_key=sort_key
         )
+        self.index_names[name] = index_name
 
 
 ######################################

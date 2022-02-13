@@ -120,7 +120,10 @@ class AwsCustomClient:
             self.table = self.resource.Table(table_name)
 
         def query_items(
-            self, keys: Dict[str, Any], filters: Dict[str, Tuple[str, str]]
+            self,
+            keys: Dict[str, Any],
+            filters: Dict[str, Tuple[str, str]],
+            index_name: str = None,
         ) -> Optional[Dict[str, Any]]:
             key_conditions = None
             filter_conditions = None
@@ -142,6 +145,7 @@ class AwsCustomClient:
                     filter_conditions = condition
 
             params = {
+                **({"IndexName": index_name} if index_name else {}),
                 "KeyConditionExpression": key_conditions,
                 "FilterExpression": filter_conditions,
             }

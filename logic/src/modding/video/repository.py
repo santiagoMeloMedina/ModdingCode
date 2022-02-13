@@ -10,3 +10,6 @@ class VideoRepository(repo.Repository):
 
     def video_presigned_url(self, video_id: str, expire_time: int) -> str:
         return self.put_presigned_url("video", video_id, expire_time)
+
+    def video_download_presigned_url(self, video_id: str, expire_time: int) -> str:
+        return self.get_presigned_url("video", video_id, expire_time)

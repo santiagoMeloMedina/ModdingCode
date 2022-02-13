@@ -67,10 +67,14 @@ class Repository:
         else:
             raise self.NotFoundEntityException(id)
 
-    def query_items(self, keys: Dict[str, Any]) -> List[model.Model]:
+    def query_items(
+        self, keys: Dict[str, Any], index_name: str = None
+    ) -> List[model.Model]:
         result = []
         items = self.table.query_items(
-            keys, {"data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value)}
+            keys,
+            {"data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value)},
+            index_name=index_name,
         )
         if items:
             result = [self.__model.parse_obj(item) for item in items]

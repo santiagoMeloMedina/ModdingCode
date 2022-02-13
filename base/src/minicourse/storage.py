@@ -30,7 +30,9 @@ class MinicourseTable(entities.Table):
         )
 
         self.add_secundary_index(
-            partition_key=Attribute(name="category_id", type=AttributeType.STRING)
+            name="Category",
+            partition_key=Attribute(name="category_id", type=AttributeType.STRING),
+            sort_key=Attribute(name="creation_date", type=AttributeType.NUMBER),
         )
 
 

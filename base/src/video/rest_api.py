@@ -12,6 +12,7 @@ class VideoRestApi(entities.LambdaRestApi):
         add_video_lambda: video_lambdas.CreateVideoLambda,
         delete_video: video_lambdas.DeleteVideoLambda,
         update_video: video_lambdas.UpdateVideoLambda,
+        get_video: video_lambdas.GetVideoLambda,
     ):
         super().__init__(scope=scope, id="VideoRestApi", name="VideoRestApi")
 
@@ -33,4 +34,12 @@ class VideoRestApi(entities.LambdaRestApi):
             self.main_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_video,
+        )
+
+        self.get_video_resource = self.main_resource.add_resource("get")
+
+        self.add_method(
+            self.get_video_resource,
+            method=HttpMethods.POST,
+            integration_lambda=get_video,
         )

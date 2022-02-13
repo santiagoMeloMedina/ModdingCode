@@ -67,3 +67,27 @@ class UpdateVideoLambda(entities.Lambda):
         )
 
         self.grant_table(video_table, read=True, write=True)
+
+
+@injector
+class GetVideoLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: video_stack.VideoStack,
+        video_bucket: video_storage.VideoBucket,
+        video_table: video_storage.VideoTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="GetVideoLambda",
+            source="modding/video/get_video",
+            env={
+                **video_table.get_env_name_var(),
+                **video_bucket.get_env_name_var(),
+                **video_table.get_index_names(),
+                "VIDEO_DOWNLOAD_EXPIRE_TIME": "300",
+            },
+        )
+
+        self.grant_table(video_table, read=True, write=True)
+        self.grant_bucket(video_bucket, read=True, write=True)

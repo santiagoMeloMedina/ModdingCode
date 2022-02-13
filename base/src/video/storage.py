@@ -28,3 +28,9 @@ class VideoTable(entities.Table):
             entity_name="Video",
             partition_key=Attribute(name="id", type=AttributeType.STRING),
         )
+
+        self.add_secundary_index(
+            name="VideoMinicourse",
+            partition_key=Attribute(name="minicourse_id", type=AttributeType.STRING),
+            sort_key=Attribute(name="creation_date", type=AttributeType.NUMBER),
+        )
