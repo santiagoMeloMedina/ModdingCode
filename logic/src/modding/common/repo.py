@@ -141,7 +141,7 @@ class Repository:
         entity = self.__get_item_by_id_no_exception(id)
         if entity:
             item = entity.dict()
-            item.update({"data_state": model.DataState.INACTIVE})
+            item.update({"data_state": model.DataState.INACTIVE.value})
             self.table.put_item(item)
         else:
             raise self.DeletingNotExistentEntity(id)

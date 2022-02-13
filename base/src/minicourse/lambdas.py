@@ -108,3 +108,20 @@ class GetCategoriesLambda(entities.Lambda):
         )
 
         self.grant_table(table=category_table, read=True, write=True)
+
+
+@injector
+class DeleteCategoryLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: minicourse_stack.MinicourseStack,
+        category_table: minicourse_storage.CategoryTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="DeleteCategoryLambda",
+            source="modding/minicourse/category/delete_category",
+            env={**category_table.get_env_name_var()},
+        )
+
+        self.grant_table(table=category_table, read=True, write=True)
