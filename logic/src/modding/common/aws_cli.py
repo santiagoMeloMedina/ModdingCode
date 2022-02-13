@@ -148,6 +148,23 @@ class AwsCustomClient:
 
             return self.table.query(**params).get("Items") or None
 
+        def scan_items(
+            self, filters: Dict[str, Tuple[str, str]]
+        ) -> Optional[Dict[str, Any]]:
+            filter_conditions = None
+            for filter in filters:
+                comparison, value = filters[filter]
+                operator: ComparisonCondition = getattr(Attr(filter), comparison)
+                condition = operator(value)
+                if filter_conditions:
+                    filter_conditions &= condition
+                else:
+                    filter_conditions = condition
+
+            return (
+                self.table.scan(FilterExpression=filter_conditions).get("Items") or None
+            )
+
         def get_item(
             self, keys: Dict[str, Any], filters: Dict[str, Tuple[str, str]]
         ) -> Optional[Dict[str, Any]]:

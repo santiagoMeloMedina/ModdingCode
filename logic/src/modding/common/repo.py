@@ -1,3 +1,5 @@
+import copy
+from typing import Any, Dict, List
 from modding.common import exception, aws_cli, model
 from modding.utils import date
 
@@ -64,6 +66,26 @@ class Repository:
             return item
         else:
             raise self.NotFoundEntityException(id)
+
+    def query_items(self, keys: Dict[str, Any]) -> List[model.Model]:
+        result = []
+        items = self.table.query_items(
+            keys, {"data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value)}
+        )
+        if items:
+            result = [self.__model.parse_obj(item) for item in items]
+        return result
+
+    def scan_items(self, attr: Dict[str, Any]) -> List[model.Model]:
+        result = []
+        filters = copy.deepcopy(attr)
+        filters.update(
+            {"data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value)}
+        )
+        items = self.table.scan_items(filters)
+        if items:
+            result = [self.__model.parse_obj(item) for item in items]
+        return result
 
     def put_presigned_url(self, path: str, id: str, expire_time: int) -> str:
         try:
