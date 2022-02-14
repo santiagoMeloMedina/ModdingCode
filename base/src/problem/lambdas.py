@@ -100,3 +100,23 @@ class GetProblemLambda(entities.Lambda):
         )
 
         self.grant_table(table=problem_table, read=True, write=True)
+
+
+@injector
+class GetEvaluationLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        evaluation_table: storage.ProblemEvaluationTable,
+    ):
+        super().__init__(
+            scope=scope,
+            id="GetEvaluationLambda",
+            source="modding/problem/evaluation/get_evaluation",
+            env={
+                **evaluation_table.get_env_name_var(),
+                **evaluation_table.get_index_names(),
+            },
+        )
+
+        self.grant_table(table=evaluation_table, read=True, write=True)

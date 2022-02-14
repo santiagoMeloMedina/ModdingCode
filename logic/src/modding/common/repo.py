@@ -88,7 +88,7 @@ class Repository:
             keys,
             {
                 "data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value),
-                "username": self._username,
+                "username": (self.EQUAL_COMPARISON, self._username),
             },
             index_name=index_name,
         )
