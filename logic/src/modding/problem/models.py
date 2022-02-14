@@ -18,19 +18,17 @@ class ProblemDescription(model.Model):
 
 class ProblemInputFile(model.Model):
     id: str
-    name: str
-
-
-class ProblemTestCase(model.Model):
-    input_files: List[ProblemInputFile] = list()
-    output_files: List[ProblemInputFile] = list()
+    input_name: str
+    output_name: str
+    input_id: str
+    output_id: str
 
 
 class Problem(model.Model):
     name: str
     minicourse_id: str
     description: Optional[ProblemDescription]
-    test_case: Optional[ProblemTestCase]
+    test_case: Optional[List[ProblemInputFile]]
     difficulty: int
     status: ProblemStatus
 

@@ -120,3 +120,26 @@ class GetEvaluationLambda(entities.Lambda):
         )
 
         self.grant_table(table=evaluation_table, read=True, write=True)
+
+
+@injector
+class UploadProblemTestCaseLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        problem_table: storage.ProblemTable,
+        problem_bucket: storage.ProblemBucket,
+    ):
+        super().__init__(
+            scope=scope,
+            id="UploadProblemTestCaseLambda",
+            source="modding/problem/upload_test_cases",
+            env={
+                **problem_table.get_env_name_var(),
+                **problem_bucket.get_env_name_var(),
+                "UPLOAD_URL_EXPIRE_TIME": "300",
+            },
+        )
+
+        self.grant_table(table=problem_table, read=True, write=True)
+        self.grant_bucket(problem_bucket, read=True, write=True)
