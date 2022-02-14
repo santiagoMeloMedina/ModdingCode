@@ -45,6 +45,7 @@ class GetMinicourseLambda(entities.Lambda):
             env={
                 **minicourse_table.get_env_name_var(),
                 **minicourse_bucket.get_env_name_var(),
+                **minicourse_table.get_index_names(),
                 "THUMB_DOWNLOAD_EXPIRE_TIME": "300",
                 "THUMB_UPLOAD_EXPIRE_TIME": "300",
                 "MULTIPLE_MINICOURSE_RETRIVAL_LIMIT": "10",

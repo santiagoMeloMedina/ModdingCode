@@ -80,6 +80,22 @@ class Repository:
             result = [self.__model.parse_obj(item) for item in items]
         return result
 
+    def query_items_by_username(
+        self, keys: Dict[str, Any], index_name: str = None
+    ) -> List[model.Model]:
+        result = []
+        items = self.table.query_items(
+            keys,
+            {
+                "data_state": (self.EQUAL_COMPARISON, model.DataState.ACTIVE.value),
+                "username": self._username,
+            },
+            index_name=index_name,
+        )
+        if items:
+            result = [self.__model.parse_obj(item) for item in items]
+        return result
+
     def scan_items(self, attr: Dict[str, Any]) -> List[model.Model]:
         result = []
         filters = copy.deepcopy(attr)

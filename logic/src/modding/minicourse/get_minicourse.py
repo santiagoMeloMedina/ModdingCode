@@ -11,6 +11,7 @@ class _Settings(settings.Settings):
     thumb_download_expire_time: str
     thumb_upload_expire_time: str
     multiple_minicourse_retrival_limit: str
+    minicourse_username_index_name: str
 
 
 _SETTINGS = _Settings()
@@ -81,11 +82,19 @@ def get_minicourse_thumb_upload_url(id: str, **kwargs) -> Dict[str, Any]:
     return {"thumb_upload_url": thumb_upload_url}
 
 
+def get_minicourses_by_username(**kwargs) -> Dict[str, Any]:
+    minicourses = MINICOURSE_REPOSITORY.query_by_username(
+        username_index_name=_SETTINGS.minicourse_username_index_name,
+    )
+    return {"minicourses": [minicourse.dict() for minicourse in minicourses]}
+
+
 def actions(action: str, params: Dict[str, Any], **kwargs) -> Dict[str, Any]:
     mapped_actions = {
         "get_minicourse": get_minicourse,
         "get_multiple_minicourses": get_multiple_minicourses,
         "get_minicourse_thumb_upload_url": get_minicourse_thumb_upload_url,
+        "get_minicourses_by_username": get_minicourses_by_username,
     }
 
     def empty(**kwargs):

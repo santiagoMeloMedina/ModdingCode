@@ -1,3 +1,4 @@
+from typing import List
 from modding.common import repo
 from modding.minicourse import models
 
@@ -18,3 +19,7 @@ class MinicourseRepository(repo.Repository):
 
     def thumb_get_presigned_url(self, thumb_id: str, expire_time: int) -> str:
         return self.get_presigned_url(self.THUMBNAILS_PATH, thumb_id, expire_time)
+
+    def query_by_username(self, username_index_name: str) -> List[models.Minicourse]:
+        keys = {"username": self._username}
+        return self.query_items(keys, index_name=username_index_name)
