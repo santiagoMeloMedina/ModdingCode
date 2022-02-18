@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from modding.common import exception, settings, logging, http
 from modding.problem import repository, models
-from modding.utils import function
+from modding.utils import function, date
 from modding.common.aws_cli import AwsCustomClient as aws_client
 
 
@@ -52,17 +52,24 @@ def build_updated_problem(
         common_id = lambda _name: f"{problem.id}-{len(problem.test_case or [])}_{_name}"
         common_file_id = lambda _type: f"{common_id(_type)}.txt"
         problem_data = problem.dict()
-        problem_data.update({"id": problem_id})
         new_test_case = models.ProblemInputFile(
             id=common_id("test"),
             input_name=input_name,
             output_name=output_name,
             input_id=common_file_id("input"),
             output_id=common_file_id("output"),
+            creation_date=date.get_unix_time_from_now(),
         )
-        result = models.Problem(
-            **problem_data, test_case=problem.test_case + [new_test_case]
+        problem_data.update(
+            {
+                "id": problem_id,
+                "test_case": [
+                    *(problem.test_case if problem.test_case is not None else []),
+                    new_test_case,
+                ],
+            }
         )
+        result = models.Problem(**problem_data)
     except Exception as e:
         raise ProblemNotBuilt(problem_id, e)
 
