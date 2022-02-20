@@ -7,6 +7,9 @@ from modding.common import exception
 from modding.utils import jwt
 
 
+AUTH0_CLAIMS_PREFIX = "http://claims/"
+
+
 class AwsCustomClient:
     class ApiGateway:
         class NoAuthorizationHeader(exception.LoggingErrorException):
@@ -39,7 +42,7 @@ class AwsCustomClient:
                 raise cls.NoAuthorizationHeader()
 
         @staticmethod
-        def __set_username_on_repos(*repositories: Any, username: str):
+        def __set_username_on_repos(*repositories: Any, username: str, **kwargs):
             for repository in repositories:
                 repository.set_username(username)
 
@@ -59,6 +62,9 @@ class AwsCustomClient:
 
             if any([key in actions for key in kwargs]):
                 payload = cls.__decode_header_auth_token(headers)
+
+                username = payload.get("%susername" % (AUTH0_CLAIMS_PREFIX))
+                payload.update({"username": username})
 
                 def dummy_method(*args, **kwargs):
                     pass
@@ -186,6 +192,14 @@ class AwsCustomClient:
         def delete_item(self, key: Dict[str, Any]) -> None:
             self.table.delete_item(Key=key)
 
+    class SSMParams:
+        def __init__(self):
+            self.client = boto3.client("ssm")
+
+        def get_secure_params(self, path: str) -> str:
+            param = self.client.get_parameter(Name=path)
+            return param.get("Parameter", dict()).get("Value", str())
+
     @classmethod
     def s3(cls, bucket_name: str) -> S3:
         return cls.S3(bucket_name)
@@ -193,3 +207,7 @@ class AwsCustomClient:
     @classmethod
     def dynamo(cls, table_name: str) -> DynamoDB:
         return cls.DynamoDB(table_name=table_name)
+
+    @classmethod
+    def ssm(cls) -> SSMParams:
+        return cls.SSMParams()

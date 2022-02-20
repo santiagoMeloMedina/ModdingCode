@@ -97,6 +97,41 @@ class Bucket(_s3.Bucket):
 
 
 ######################################
+##              PARAMS              ##
+######################################
+
+
+class StringParam(_ssm.StringParameter):
+    def __init__(self, scope: Any, id: str, path: str, value: str, env_name: str):
+        super().__init__(
+            scope=scope,
+            id=id,
+            type=_ssm.ParameterType.STRING,
+            parameter_name=path,
+            string_value=value,
+        )
+
+        self.env_name = env_name
+
+
+class SecureStringParam(_ssm.StringParameter):
+
+    SECURE_PREFIX = "_secure_"
+
+    def __init__(self, scope: Any, id: str, path: str, env_name: str):
+        super().__init__(
+            scope=scope,
+            id=id,
+            type=_ssm.ParameterType.STRING,  # TODO(Santiago): Must be secure and not createable
+            parameter_name=path,
+            string_value="temp",
+        )
+
+        self.path = "%s%s" % (self.SECURE_PREFIX, path)
+        self.env_name = env_name
+
+
+######################################
 ##             LAMBDA               ##
 ######################################
 
@@ -138,6 +173,17 @@ class Lambda(_lambda.Function):
         else:
             bucket.grant_write(self)
 
+    def grant_param(
+        self, param: _ssm.StringListParameter, read: bool = False, write: bool = False
+    ) -> None:
+        if read and write:
+            param.grant_read(self)
+            param.grant_write(self)
+        elif read:
+            param.grant_read(self)
+        else:
+            param.grant_write(self)
+
 
 class Layer(_lambda.LayerVersion):
     def __init__(self, scope: Any):
@@ -150,21 +196,15 @@ class Layer(_lambda.LayerVersion):
 
 
 ######################################
-##              PARAMS              ##
+##            AUTHORIZERS           ##
 ######################################
 
 
-class StringParam(_ssm.StringParameter):
-    def __init__(self, scope: Any, id: str, path: str, value: str, env_name: str):
+class CustomLambdaAuthorizer(_apigateway.TokenAuthorizer):
+    def __init__(self, scope: core.Stack, api_id: str, authorizer_lambda: Lambda):
         super().__init__(
-            scope=scope,
-            id=id,
-            type=_ssm.ParameterType.STRING,
-            parameter_name=path,
-            string_value=value,
+            scope=scope, id="%s_authorizer" % (api_id), handler=authorizer_lambda
         )
-
-        self.env_name = env_name
 
 
 ######################################
@@ -173,10 +213,16 @@ class StringParam(_ssm.StringParameter):
 
 
 class LambdaRestApi(_apigateway.RestApi):
-    def __init__(self, scope: Any, id: str, name: str):
+    def __init__(
+        self, scope: Any, id: str, name: str, authorizer: CustomLambdaAuthorizer = None
+    ):
         super().__init__(scope=scope, id=id, rest_api_name=name)
 
-        self.authorizer = None
+        self.authorizer = authorizer
+
+        self.authorizer_type = (
+            _apigateway.AuthorizationType.CUSTOM if authorizer else None
+        )
 
     def add_method(
         self,
@@ -188,6 +234,7 @@ class LambdaRestApi(_apigateway.RestApi):
         return resource.add_method(
             http_method=method.value,
             integration=lambda_integrated,
+            authorization_type=self.authorizer_type,
             authorizer=self.authorizer,
         )
 

@@ -2,6 +2,7 @@ from src.commons import entities
 from singleton_injector import injector
 from src.commons.http import HttpMethods
 from src.minicourse import stack as minicourse_stack, lambdas as minicourse_lambdas
+from src.commons import security
 
 
 @injector
@@ -18,7 +19,14 @@ class MinicourseRestApi(entities.LambdaRestApi):
         delete_minicourse: minicourse_lambdas.DeleteMinicourseLambda,
         update_category: minicourse_lambdas.UpdateCategoryLambda,
     ):
-        super().__init__(scope=scope, id="MinicourseRestApi", name="MinicourseRestApi")
+        api_id = "MinicourseRestApi"
+
+        super().__init__(
+            scope=scope,
+            id=api_id,
+            name=api_id,
+            authorizer=security.Auth0Authorizer(scope, api_id),
+        )
 
         self.main_resource = self.root.add_resource("minicourse")
 
