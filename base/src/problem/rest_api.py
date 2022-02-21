@@ -2,6 +2,7 @@ from src.commons import entities
 from singleton_injector import injector
 from src.commons.http import HttpMethods
 from src.problem import stack, lambdas
+from src.commons import security
 
 
 @injector
@@ -17,7 +18,14 @@ class ProblemRestApi(entities.LambdaRestApi):
         get_evaluation: lambdas.GetEvaluationLambda,
         upload_test_case: lambdas.UploadProblemTestCaseLambda,
     ):
-        super().__init__(scope=scope, id="ProblemRestApi", name="ProblemRestApi")
+        api_id = "ProblemRestApi"
+
+        super().__init__(
+            scope=scope,
+            id=api_id,
+            name=api_id,
+            authorizer=security.Auth0Authorizer(scope, api_id),
+        )
 
         self.main_resource = self.root.add_resource("problem")
 

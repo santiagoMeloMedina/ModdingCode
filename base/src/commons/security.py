@@ -6,7 +6,7 @@ class Auth0SignedCertificateParam(entities.SecureStringParam):
         super().__init__(
             scope=scope,
             id="%s_Auth0SignedCertificateParam" % (api_id),
-            path="/auth0/signed_certificate",
+            path="/%s/auth0/signed_certificate" % (api_id),
             env_name="SIGNED_CERTIFICATE",
         )
 
@@ -16,7 +16,7 @@ class Auth0APIAudienceParam(entities.SecureStringParam):
         super().__init__(
             scope=scope,
             id="%s_Auth0APIAudienceParam" % (api_id),
-            path="/auth0/api_audience",
+            path="/%s/auth0/api_audience" % (api_id),
             env_name="API_AUDIENCE",
         )
 
