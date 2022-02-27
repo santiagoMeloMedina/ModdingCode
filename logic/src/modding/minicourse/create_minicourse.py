@@ -55,20 +55,13 @@ def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]) -> A
 
 def build_and_get_upload_url(
     name: str, ext: str, category_id: str, id: str
-) -> Tuple[models.Minicourse, str]:
+) -> models.Minicourse:
     ext = files.clean_extension(ext)
     minicourse = models.Minicourse(id=id, name=name, category_id=category_id, ext=ext)
-    thumb_upload_url = MINICOURSE_REPOSITORY.thumb_put_presigned_url(
-        f"{minicourse.id}.{ext}",
-        int(_SETTINGS.thumb_upload_expire_time),
-    )
-
-    return minicourse, thumb_upload_url
+    return minicourse
 
 
-def build_minicourse(
-    name: str, category_id: str, ext: str
-) -> Tuple[models.Minicourse, str]:
+def build_minicourse(name: str, category_id: str, ext: str) -> models.Minicourse:
     return id_generator.retrier_with_generator(
         category_id,
         MINICOURSE_ID_LENGTH,
@@ -76,17 +69,26 @@ def build_minicourse(
         params=([], {"name": name, "ext": ext, "category_id": category_id}),
         tries=MAX_NUMBER_TRIES,
         logging_method=_LOGGER.warning,
-        failed_message="Thumb upload url could not be generated",
+        failed_message="Minicourse could not be built",
     )
+
+
+def obtain_upload_url(minicourse: models.Minicourse) -> str:
+    thumb_upload_url = MINICOURSE_REPOSITORY.thumb_put_presigned_url(
+        f"{minicourse.id}.{minicourse.ext}",
+        int(_SETTINGS.thumb_upload_expire_time),
+    )
+    return thumb_upload_url
 
 
 def create_minicourse(
     name: str, category_id: str, ext: str, **kwargs
 ) -> Tuple[models.Minicourse, str]:
     category: models.Category = CATEGORY_REPOSITORY.get_item_by_id(category_id)
-    minicourse, thumb_upload_url = build_minicourse(name, category.id, ext)
-    if minicourse is not None and thumb_upload_url is not None:
+    minicourse = build_minicourse(name, category.id, ext)
+    if minicourse is not None:
         MINICOURSE_REPOSITORY.save_on_table(minicourse)
+        thumb_upload_url = obtain_upload_url(minicourse)
     else:
         raise MinicourseNotBuilt()
 
