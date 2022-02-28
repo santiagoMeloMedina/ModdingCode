@@ -35,6 +35,10 @@ class Repository:
         def __init__(self, message: str):
             super().__init__("Can not get presigned url, %s" % (message))
 
+    class S3ContentError(exception.LoggingErrorException):
+        def __init__(self, message: str):
+            super().__init__("Can not get content, %s" % (message))
+
     EQUAL_COMPARISON = "eq"
 
     def __init__(self, name: str, table_name: str, bucket_name: str) -> None:
@@ -126,6 +130,14 @@ class Repository:
         except Exception as e:
             raise self.S3PresigningError(e)
         return put_url
+
+    def get_content(self, path: str, id: str) -> str:
+        try:
+            object_with_path = f"{path}/{id}"
+            content = self.s3.get_file_content(object_name=object_with_path)
+        except Exception as e:
+            raise self.S3ContentError(e)
+        return content
 
     def _create_data(self, entity: model.Model, current_date: int) -> None:
         extra_creation_data = {

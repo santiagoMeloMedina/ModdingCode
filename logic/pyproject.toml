@@ -13,6 +13,7 @@ python-dotenv = "^0.19.2"
 pytz = "^2021.3"
 PyJWT = "^2.3.0"
 cryptography = "2.8"
+paramiko = "^2.9.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

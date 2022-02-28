@@ -120,6 +120,11 @@ class AwsCustomClient:
             )
             return result
 
+        def get_file_content(self, object_name: str) -> str:
+            result = self.client.get_object(Bucket=self.bucket_name, Key=object_name)
+            data = result.get("Body").read().decode("utf-8")
+            return data
+
     class DynamoDB:
         def __init__(self, table_name: str):
             self.resource = boto3.resource("dynamodb")

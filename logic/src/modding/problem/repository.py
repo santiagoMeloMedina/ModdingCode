@@ -13,3 +13,6 @@ class ProblemRepository(repo.Repository):
 
     def file_put_presigned_url(self, file_id: str, expire_time: int) -> str:
         return self.put_presigned_url(self.FILES_PATH, file_id, expire_time)
+
+    def get_file_content(self, file_id: str) -> str:
+        return self.get_content(self.FILES_PATH, file_id)

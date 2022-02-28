@@ -137,7 +137,14 @@ class SecureStringParam(_ssm.StringParameter):
 
 
 class Lambda(_lambda.Function):
-    def __init__(self, scope: Stack, id: str, source: str, env: Dict[str, str]):
+    def __init__(
+        self,
+        scope: Stack,
+        id: str,
+        source: str,
+        env: Dict[str, str],
+        timeout_seconds: int = None,
+    ):
         super().__init__(
             scope=scope,
             id=id,
@@ -151,6 +158,7 @@ class Lambda(_lambda.Function):
             runtime=_lambda.Runtime.PYTHON_3_8,
             environment=env,
             layers=[scope.layer],
+            timeout=core.Duration.seconds(timeout_seconds) if timeout_seconds else None,
         )
 
     def grant_table(
