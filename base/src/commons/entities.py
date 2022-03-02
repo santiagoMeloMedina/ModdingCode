@@ -1,6 +1,7 @@
+import enum
 import re
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from aws_cdk import (
     core,
     aws_lambda as _lambda,
@@ -131,6 +132,47 @@ class SecureStringParam(_ssm.StringParameter):
         self.env_name = env_name
 
 
+class ConstructableSecureStringParam:
+
+    SECURE_PREFIX = "_secure_"
+    EMPTY_ROLES = "empty"
+
+    def __init__(self, scope: Any, id: str, path: str, env_name: str):
+        self.value = str()
+        self.scope = scope
+        self.id = id
+        self.param_name = path
+        self.path = "%s%s" % (self.SECURE_PREFIX, path)
+        self.env_name = env_name
+
+        self.granted_read: List[Any] = []
+        self.granted_write: List[Any] = []
+
+    def grant_read(self, function: Any):
+        self.granted_read.append(function)
+
+    def grant_write(self, function: Any):
+        self.granted_write.append(function)
+
+    def add_to_value(self, value_part: str):
+        self.value = self.value + " %s" % (value_part)
+
+    def construct_secure_string(self):
+        param = _ssm.StringParameter(
+            scope=self.scope,
+            id=self.id,
+            type=_ssm.ParameterType.STRING,
+            parameter_name=self.param_name,
+            string_value=self.value or self.EMPTY_ROLES,
+        )
+
+        for reader in self.granted_read:
+            param.grant_read(reader)
+
+        for writter in self.granted_write:
+            param.grant_write(writter)
+
+
 ######################################
 ##             LAMBDA               ##
 ######################################
@@ -214,6 +256,12 @@ class CustomLambdaAuthorizer(_apigateway.TokenAuthorizer):
             scope=scope, id="%s_authorizer" % (api_id), handler=authorizer_lambda
         )
 
+    def add_role(self, *agrs, **args):
+        pass
+
+    def construct_roles(self):
+        pass
+
 
 ######################################
 ##             RESTAPI              ##
@@ -237,14 +285,25 @@ class LambdaRestApi(_apigateway.RestApi):
         resource: _apigateway.Resource,
         method: HttpMethods,
         integration_lambda: Lambda,
+        roles: List[enum.Enum] = list(),
     ) -> _apigateway.Method:
         lambda_integrated = LambdaApiIntegration(handler=integration_lambda)
-        return resource.add_method(
+
+        resource_method = resource.add_method(
             http_method=method.value,
             integration=lambda_integrated,
             authorization_type=self.authorizer_type,
             authorizer=self.authorizer,
         )
+
+        if roles and self.authorizer:
+            built_method_arn = "%s%s" % (method.value, resource.path)
+            self.authorizer.add_role(
+                method_arn=built_method_arn,
+                roles=[str(role.value) for role in roles],
+            )
+
+        return resource_method
 
 
 class LambdaApiIntegration(_apigateway.LambdaIntegration):

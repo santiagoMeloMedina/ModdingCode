@@ -1,8 +1,16 @@
+import enum
 from src.commons import entities
 from singleton_injector import injector
 from src.commons.http import HttpMethods
 from src.minicourse import stack as minicourse_stack, lambdas as minicourse_lambdas
 from src.commons import security
+
+
+class Scopes(enum.Enum):
+    W_MINICOURSE = "w_minicourse"
+    R_MINICOURSE = "r_minicourse"
+    W_CATEGORY = "w_category"
+    R_CATEGORY = "r_category"
 
 
 @injector
@@ -34,6 +42,7 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.main_resource,
             method=HttpMethods.POST,
             integration_lambda=create_minicourse,
+            roles=[Scopes.W_MINICOURSE, Scopes.R_CATEGORY],
         )
 
         self.get_minicourse = self.main_resource.add_resource("get")
@@ -42,12 +51,14 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.get_minicourse,
             method=HttpMethods.POST,
             integration_lambda=get_minicourse,
+            roles=[Scopes.R_MINICOURSE, Scopes.R_CATEGORY],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_minicourse,
+            roles=[Scopes.R_MINICOURSE, Scopes.R_CATEGORY],
         )
 
         self.category_resource = self.main_resource.add_resource("category")
@@ -56,6 +67,7 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.category_resource,
             method=HttpMethods.POST,
             integration_lambda=create_category,
+            roles=[Scopes.W_CATEGORY],
         )
 
         self.get_categories = self.category_resource.add_resource("get")
@@ -64,22 +76,28 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.get_categories,
             method=HttpMethods.POST,
             integration_lambda=get_category,
+            roles=[Scopes.R_CATEGORY],
         )
 
         self.add_method(
             self.category_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_category,
+            roles=[Scopes.W_CATEGORY],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_minicourse,
+            roles=[Scopes.W_MINICOURSE, Scopes.R_MINICOURSE],
         )
 
         self.add_method(
             self.category_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_category,
+            roles=[Scopes.W_CATEGORY, Scopes.R_CATEGORY],
         )
+
+        self.authorizer.construct_roles()
