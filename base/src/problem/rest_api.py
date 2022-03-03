@@ -1,8 +1,20 @@
+import enum
 from src.commons import entities
 from singleton_injector import injector
 from src.commons.http import HttpMethods
 from src.problem import stack, lambdas
 from src.commons import security
+
+
+class Scopes(enum.Enum):
+    create_problem = "create/problem"
+    get_problem = "get/problem"
+    update_problem = "update/problem"
+    delete_problem = "delete/problem"
+    create_evaluation = "create/evaluation"
+    get_evaluation = "get/evaluation"
+    update_evaluation = "update/evaluation"
+    delete_evaluation = "delete/evaluation"
 
 
 @injector
@@ -33,6 +45,7 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.main_resource,
             method=HttpMethods.POST,
             integration_lambda=create_problem,
+            roles=[Scopes.create_problem],
         )
 
         self.evaluation_resource = self.main_resource.add_resource("evaluation")
@@ -41,18 +54,21 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.evaluation_resource,
             method=HttpMethods.POST,
             integration_lambda=evaluate_problem,
+            roles=[Scopes.create_evaluation],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_problem,
+            roles=[Scopes.delete_problem],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_problem,
+            roles=[Scopes.update_problem],
         )
 
         self.get_problem_resource = self.main_resource.add_resource("get")
@@ -61,6 +77,7 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.get_problem_resource,
             method=HttpMethods.POST,
             integration_lambda=get_problem,
+            roles=[Scopes.get_problem],
         )
 
         self.get_evaluation_resource = self.evaluation_resource.add_resource("get")
@@ -69,6 +86,7 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.get_evaluation_resource,
             method=HttpMethods.POST,
             integration_lambda=get_evaluation,
+            roles=[Scopes.get_evaluation],
         )
 
         self.test_case_resource = self.main_resource.add_resource("testcase")
@@ -77,4 +95,7 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.test_case_resource,
             method=HttpMethods.POST,
             integration_lambda=upload_test_case,
+            roles=[Scopes.update_problem, Scopes.update_evaluation],
         )
+
+        self.authorizer.construct_roles()

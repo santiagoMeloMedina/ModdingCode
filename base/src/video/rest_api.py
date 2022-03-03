@@ -1,8 +1,16 @@
+import enum
 from src.commons import entities
 from singleton_injector import injector
 from src.commons.http import HttpMethods
 from src.video import stack as video_stack, lambdas as video_lambdas
 from src.commons import security
+
+
+class Scopes(enum.Enum):
+    create_video = "create/video"
+    get_video = "get/video"
+    update_video = "update/video"
+    delete_video = "delete/video"
 
 
 @injector
@@ -30,18 +38,21 @@ class VideoRestApi(entities.LambdaRestApi):
             resource=self.main_resource,
             method=HttpMethods.POST,
             integration_lambda=add_video_lambda,
+            roles=[Scopes.create_video],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_video,
+            roles=[Scopes.delete_video],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_video,
+            roles=[Scopes.update_video],
         )
 
         self.get_video_resource = self.main_resource.add_resource("get")
@@ -50,4 +61,7 @@ class VideoRestApi(entities.LambdaRestApi):
             self.get_video_resource,
             method=HttpMethods.POST,
             integration_lambda=get_video,
+            roles=[Scopes.get_video],
         )
+
+        self.authorizer.construct_roles()

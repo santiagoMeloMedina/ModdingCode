@@ -7,10 +7,14 @@ from src.commons import security
 
 
 class Scopes(enum.Enum):
-    W_MINICOURSE = "w_minicourse"
-    R_MINICOURSE = "r_minicourse"
-    W_CATEGORY = "w_category"
-    R_CATEGORY = "r_category"
+    create_minicourse = "create/minicourse"
+    get_minicourse = "get/minicourse"
+    create_category = "create/category"
+    get_category = "get/category"
+    update_minicourse = "update/minicourse"
+    delete_category = "delete/category"
+    delete_minicourse = "delete/minicourse"
+    update_category = "update/category"
 
 
 @injector
@@ -42,7 +46,7 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.main_resource,
             method=HttpMethods.POST,
             integration_lambda=create_minicourse,
-            roles=[Scopes.W_MINICOURSE, Scopes.R_CATEGORY],
+            roles=[Scopes.create_minicourse],
         )
 
         self.get_minicourse = self.main_resource.add_resource("get")
@@ -51,14 +55,14 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.get_minicourse,
             method=HttpMethods.POST,
             integration_lambda=get_minicourse,
-            roles=[Scopes.R_MINICOURSE, Scopes.R_CATEGORY],
+            roles=[Scopes.get_minicourse],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_minicourse,
-            roles=[Scopes.R_MINICOURSE, Scopes.R_CATEGORY],
+            roles=[Scopes.update_minicourse],
         )
 
         self.category_resource = self.main_resource.add_resource("category")
@@ -67,7 +71,7 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.category_resource,
             method=HttpMethods.POST,
             integration_lambda=create_category,
-            roles=[Scopes.W_CATEGORY],
+            roles=[Scopes.create_category],
         )
 
         self.get_categories = self.category_resource.add_resource("get")
@@ -76,28 +80,28 @@ class MinicourseRestApi(entities.LambdaRestApi):
             self.get_categories,
             method=HttpMethods.POST,
             integration_lambda=get_category,
-            roles=[Scopes.R_CATEGORY],
+            roles=[Scopes.get_category],
         )
 
         self.add_method(
             self.category_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_category,
-            roles=[Scopes.W_CATEGORY],
+            roles=[Scopes.delete_category],
         )
 
         self.add_method(
             self.main_resource,
             method=HttpMethods.DELETE,
             integration_lambda=delete_minicourse,
-            roles=[Scopes.W_MINICOURSE, Scopes.R_MINICOURSE],
+            roles=[Scopes.delete_minicourse],
         )
 
         self.add_method(
             self.category_resource,
             method=HttpMethods.PUT,
             integration_lambda=update_category,
-            roles=[Scopes.W_CATEGORY, Scopes.R_CATEGORY],
+            roles=[Scopes.update_category],
         )
 
         self.authorizer.construct_roles()
