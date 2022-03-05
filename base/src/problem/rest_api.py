@@ -29,6 +29,7 @@ class ProblemRestApi(entities.LambdaRestApi):
         get_problem: lambdas.GetProblemLambda,
         get_evaluation: lambdas.GetEvaluationLambda,
         upload_test_case: lambdas.UploadProblemTestCaseLambda,
+        send_message_to_expert: lambdas.SendMessageToExpertLambda,
     ):
         api_id = "ProblemRestApi"
 
@@ -96,6 +97,16 @@ class ProblemRestApi(entities.LambdaRestApi):
             method=HttpMethods.POST,
             integration_lambda=upload_test_case,
             roles=[Scopes.update_problem, Scopes.update_evaluation],
+        )
+
+        self.send_message = self.main_resource.add_resource("send-message")
+
+        self.send_to_expert = self.send_message.add_resource("expert")
+
+        self.add_method(
+            self.send_to_expert,
+            method=HttpMethods.POST,
+            integration_lambda=send_message_to_expert,
         )
 
         self.authorizer.construct_roles()

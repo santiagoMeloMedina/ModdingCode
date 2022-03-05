@@ -16,6 +16,16 @@ from src.commons.http import HttpMethods
 
 
 ######################################
+##          POLICY VALUES           ##
+######################################
+
+
+class PolicyAction(enum.Enum):
+    SES_SEND = "ses:SendEmail"
+    SES_SEND_RAW = "ses:SendRawEmail"
+
+
+######################################
 ##              STACK               ##
 ######################################
 
@@ -233,6 +243,15 @@ class Lambda(_lambda.Function):
             param.grant_read(self)
         else:
             param.grant_write(self)
+
+    def add_allow_policy(self, actions: List[PolicyAction]) -> None:
+        self.add_to_role_policy(
+            statement=_iam.PolicyStatement(
+                actions=[action.value for action in actions],
+                resources=["*"],
+                effect=_iam.Effect.ALLOW,
+            )
+        )
 
 
 class Layer(_lambda.LayerVersion):

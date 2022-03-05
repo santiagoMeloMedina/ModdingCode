@@ -196,3 +196,21 @@ class UploadProblemTestCaseLambda(entities.Lambda):
 
         self.grant_table(table=problem_table, read=True, write=True)
         self.grant_bucket(problem_bucket, read=True, write=True)
+
+
+@injector
+class SendMessageToExpertLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+    ):
+        super().__init__(
+            scope=scope,
+            id="SendMessageToExpertLambda",
+            source="modding/problem/send_question",
+            env={},
+        )
+
+        self.add_allow_policy(
+            [entities.PolicyAction.SES_SEND, entities.PolicyAction.SES_SEND_RAW]
+        )

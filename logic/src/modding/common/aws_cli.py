@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import boto3
 import json
 from boto3.dynamodb.conditions import Key, Attr, ComparisonCondition
@@ -64,7 +64,9 @@ class AwsCustomClient:
                 payload = cls.__decode_header_auth_token(headers)
 
                 username = payload.get("%susername" % (AUTH0_CLAIMS_PREFIX))
-                payload.update({"username": username})
+                username_attr = {"username": username}
+                payload.update(username_attr)
+                headers.update(username_attr)
 
                 def dummy_method(*args, **kwargs):
                     pass
@@ -205,6 +207,40 @@ class AwsCustomClient:
             param = self.client.get_parameter(Name=path)
             return param.get("Parameter", dict()).get("Value", str())
 
+    class SES:
+        CHARSET = "UTF-8"
+
+        def __init__(self, email_source_address: str):
+            self.client = boto3.client("ses")
+            self.source_address = email_source_address
+
+        def verify_address(self, email_address: str) -> Any:
+            response = self.client.verify_email_identity(EmailAddress=email_address)
+            return response
+
+        def send_html_email(
+            self, email_address: Union[str, List[str]], subject: str, html_content: str
+        ) -> Any:
+            if type(email_address) == str:
+                addresses = [email_address]
+            response = self.client.send_email(
+                Destination={"ToAddresses": [*addresses]},
+                Message={
+                    "Body": {
+                        "Html": {
+                            "Charset": self.CHARSET,
+                            "Data": html_content,
+                        }
+                    },
+                    "Subject": {
+                        "Charset": self.CHARSET,
+                        "Data": subject,
+                    },
+                },
+                Source=self.source_address,
+            )
+            return response
+
     @classmethod
     def s3(cls, bucket_name: str) -> S3:
         return cls.S3(bucket_name)
@@ -216,3 +252,7 @@ class AwsCustomClient:
     @classmethod
     def ssm(cls) -> SSMParams:
         return cls.SSMParams()
+
+    @classmethod
+    def ses(cls, source_email: str) -> SES:
+        return cls.SES(email_source_address=source_email)
