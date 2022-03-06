@@ -1,7 +1,5 @@
 import os
-from unicodedata import name
 from unittest.mock import patch, Mock
-from more_itertools import side_effect
 import pytest
 
 

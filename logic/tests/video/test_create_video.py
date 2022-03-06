@@ -38,18 +38,11 @@ def test_build(put_presigned_url: Mock):
         "section": models.VideoSections.CONTEXT,
     }
 
-    video, upload_url = subject.build(**mock_video_data)
+    video = subject.build(**mock_video_data)
 
     mock_video_data.update({"ext": files.clean_extension(mock_video_data.get("ext"))})
 
     assert models.Video(**mock_video_data) == video
-    assert upload_url == MOCK_VIDEO_THUMB_UPLOAD_URL
-
-    put_presigned_url.assert_called_once_with(
-        MOCK_VIDEOS_FOLDER_NAME,
-        f"{MOCK_VIDEO_ID}.{video.ext}",
-        300,
-    )
 
 
 @pytest.mark.unit
@@ -62,7 +55,7 @@ def test_build_with_generator(put_presigned_url: Mock):
     from modding.video import create_video as subject, models
     from modding.utils import files
 
-    video, upload_url = subject.build_video_and_upload_url(
+    video = subject.build_video(
         **{
             **MOCK_VIDEO_DATA,
             "section": models.VideoSections.CONTEXT,
@@ -81,7 +74,6 @@ def test_build_with_generator(put_presigned_url: Mock):
     )
 
     assert mock_video == video
-    assert upload_url == MOCK_VIDEO_THUMB_UPLOAD_URL
 
 
 @pytest.mark.unit
