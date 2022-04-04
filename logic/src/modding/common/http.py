@@ -11,7 +11,14 @@ class HttpCodes(enum.Enum):
 
 
 def get_response(code: HttpCodes, body: Union[Dict[str, Any], str]) -> Dict[str, Any]:
-    return {"statusCode": code.value, "body": json.dumps(body)}
+    return {
+        "statusCode": code.value,
+        "body": json.dumps(body),
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": True,
+        },
+    }
 
 
 def get_standard_success_response() -> Dict[str, Any]:

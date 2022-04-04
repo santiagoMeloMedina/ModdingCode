@@ -289,9 +289,21 @@ class CustomLambdaAuthorizer(_apigateway.TokenAuthorizer):
 
 class LambdaRestApi(_apigateway.RestApi):
     def __init__(
-        self, scope: Any, id: str, name: str, authorizer: CustomLambdaAuthorizer = None
+        self,
+        scope: Any,
+        id: str,
+        name: str,
+        authorizer: CustomLambdaAuthorizer = None,
+        allowed_origins: List[str] = ["*"],
     ):
-        super().__init__(scope=scope, id=id, rest_api_name=name)
+        super().__init__(
+            scope=scope,
+            id=id,
+            rest_api_name=name,
+            default_cors_preflight_options=_apigateway.CorsOptions(
+                allow_origins=allowed_origins
+            ),
+        )
 
         self.authorizer = authorizer
 

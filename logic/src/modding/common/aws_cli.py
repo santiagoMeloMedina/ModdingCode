@@ -75,9 +75,7 @@ class AwsCustomClient:
                     actions.get(key, dummy_method)(*kwargs.get(key), **payload)
 
         @classmethod
-        def pre_handler(
-            cls, handler: Callable[[Dict[str, Any], Dict[str, Any]], Any]
-        ) -> Any:
+        def pre_handler(cls, handler: Callable[[AGWEvent, Dict[str, Any]], Any]) -> Any:
             ## This decorator method will take the handle and use the parsed
             ## apigateway event for different actions like injecting data from
             ## events on different objects.
