@@ -60,19 +60,18 @@ class AwsCustomClient:
 
             actions = {cls.REPO_ACTION: cls.__set_username_on_repos}
 
-            if any([key in actions for key in kwargs]):
-                payload = cls.__decode_header_auth_token(headers)
+            payload = cls.__decode_header_auth_token(headers)
 
-                username = payload.get("%susername" % (AUTH0_CLAIMS_PREFIX))
-                username_attr = {"username": username}
-                payload.update(username_attr)
-                headers.update(username_attr)
+            username = payload.get("%susername" % (AUTH0_CLAIMS_PREFIX))
+            username_attr = {"username": username}
+            payload.update(username_attr)
+            headers.update(username_attr)
 
-                def dummy_method(*args, **kwargs):
-                    pass
+            def dummy_method(*args, **kwargs):
+                pass
 
-                for key in kwargs:
-                    actions.get(key, dummy_method)(*kwargs.get(key), **payload)
+            for key in kwargs:
+                actions.get(key, dummy_method)(*kwargs.get(key), **payload)
 
         @classmethod
         def pre_handler(cls, handler: Callable[[AGWEvent, Dict[str, Any]], Any]) -> Any:
@@ -212,8 +211,10 @@ class AwsCustomClient:
             self.client = boto3.client("ses")
             self.source_address = email_source_address
 
-        def verify_address(self, email_address: str) -> Any:
-            response = self.client.verify_email_identity(EmailAddress=email_address)
+        def verify_address(self) -> Any:
+            response = self.client.verify_email_identity(
+                EmailAddress=self.source_address
+            )
             return response
 
         def send_html_email(

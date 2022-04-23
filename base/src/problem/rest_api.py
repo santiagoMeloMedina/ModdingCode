@@ -15,6 +15,8 @@ class Scopes(enum.Enum):
     get_evaluation = "get/evaluation"
     update_evaluation = "update/evaluation"
     delete_evaluation = "delete/evaluation"
+    send_msg_as_expert = "send_msg/expert"
+    send_msg_as_student = "send_msg/student"
 
 
 @injector
@@ -30,6 +32,7 @@ class ProblemRestApi(entities.LambdaRestApi):
         get_evaluation: lambdas.GetEvaluationLambda,
         upload_test_case: lambdas.UploadProblemTestCaseLambda,
         send_message_to_expert: lambdas.SendMessageToExpertLambda,
+        send_message_to_student: lambdas.SendMessageToStudentLambda,
     ):
         api_id = "ProblemRestApi"
 
@@ -107,6 +110,38 @@ class ProblemRestApi(entities.LambdaRestApi):
             self.send_to_expert,
             method=HttpMethods.POST,
             integration_lambda=send_message_to_expert,
+            roles=[Scopes.send_msg_as_student],
+        )
+
+        self.send_to_student = self.send_message.add_resource("student")
+
+        self.add_method(
+            self.send_to_student,
+            method=HttpMethods.POST,
+            integration_lambda=send_message_to_student,
+            roles=[Scopes.send_msg_as_expert],
         )
 
         self.authorizer.construct_roles()
+
+
+@injector
+class UserRestAPI(entities.LambdaRestApi):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        sign_up: lambdas.SignUpLambda,
+    ):
+        api_id = "UserRestAPI"
+
+        super().__init__(scope=scope, id=api_id, name=api_id)
+
+        self.main_resource = self.root.add_resource("user")
+
+        self.signup_resource = self.main_resource.add_resource("signup")
+
+        self.add_method(
+            self.signup_resource,
+            method=HttpMethods.POST,
+            integration_lambda=sign_up,
+        )

@@ -40,6 +40,50 @@ class EvaluationInstanceUsernameParam(entities.SecureStringParam):
         )
 
 
+@injector
+class Auth0DomainParam(entities.SecureStringParam):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            id="Auth0DomainParam",
+            path="/auth0/domain",
+            env_name="AUTH0_DOMAIN",
+        )
+
+
+@injector
+class Auth0ClientIDParam(entities.SecureStringParam):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            id="Auth0ClientIDParam",
+            path="/auth0/client_id",
+            env_name="AUTH0_CLIENT_ID",
+        )
+
+
+@injector
+class Auth0ClientSecretParam(entities.SecureStringParam):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            id="Auth0ClientSecretParam",
+            path="/auth0/client_secret",
+            env_name="AUTH0_CLIENT_SECRET",
+        )
+
+
+@injector
+class Auth0AudienceParam(entities.SecureStringParam):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            id="Auth0AudienceParam",
+            path="/auth0/audience",
+            env_name="AUTH0_AUDIENCE",
+        )
+
+
 ### LAMBDAS ###
 
 
@@ -213,4 +257,45 @@ class SendMessageToExpertLambda(entities.Lambda):
 
         self.add_allow_policy(
             [entities.PolicyAction.SES_SEND, entities.PolicyAction.SES_SEND_RAW]
+        )
+
+
+@injector
+class SendMessageToStudentLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+    ):
+        super().__init__(
+            scope=scope,
+            id="SendMessageToStudentLambda",
+            source="modding/problem/send_response",
+            env={},
+        )
+
+        self.add_allow_policy(
+            [entities.PolicyAction.SES_SEND, entities.PolicyAction.SES_SEND_RAW]
+        )
+
+
+@injector
+class SignUpLambda(entities.Lambda):
+    def __init__(
+        self,
+        scope: stack.ProblemStack,
+        auth0_domain: Auth0DomainParam,
+        auth0_client_id: Auth0ClientIDParam,
+        auth0_client_secret: Auth0ClientSecretParam,
+        auth0_audience: Auth0AudienceParam,
+    ):
+        super().__init__(
+            scope=scope,
+            id="SignUpLambda",
+            source="modding/problem/signup",
+            env={
+                auth0_domain.env_name: auth0_domain.path,
+                auth0_client_id.env_name: auth0_client_id.path,
+                auth0_client_secret.env_name: auth0_client_secret.path,
+                auth0_audience.env_name: auth0_audience.path,
+            },
         )

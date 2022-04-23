@@ -5,7 +5,7 @@ from modding.utils import email
 
 _LOGGER = logging.Logger()
 
-EMAIL_SUBJECT = "New message from student {username}"
+EMAIL_SUBJECT = "New message from expert {username}"
 
 aws_client = aws_cli.AwsCustomClient
 
@@ -13,7 +13,7 @@ aws_client = aws_cli.AwsCustomClient
 @aws_client.ApiGateway.pre_handler
 def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]):
     try:
-        result = _send_message_to_expert(
+        result = _send_message_to_student(
             **{**event.body, "user_email": event.headers.get("username")}
         )
 
@@ -24,7 +24,7 @@ def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]):
     return response
 
 
-def _send_message_to_expert(user_email: str, expert_email: str, message: str) -> None:
+def _send_message_to_student(user_email: str, expert_email: str, message: str) -> None:
     ses_client = aws_client.ses(user_email)
     ses_client.send_html_email(
         email_address=expert_email,
