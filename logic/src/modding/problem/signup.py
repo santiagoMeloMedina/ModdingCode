@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from modding.common import http, logging, aws_cli, settings
 import requests
+import json
 
 
 class _Settings(settings.Settings):
@@ -40,21 +41,26 @@ def get_auth0_access_token() -> str:
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    return dict(response.content).get("access_token")
+    return dict(response.json()).get("access_token")
 
 
 def create_auth0_user(email: str, password: str) -> Dict[str, Any]:
     response = requests.post(
         f"https://{_SETTINGS.auth0_domain}/api/v2/users",
-        data={
-            "email": email,
-            "connection": "Username-Password-Authentication",
-            "password": password,
-            "email_verified": True,
+        data=json.dumps(
+            {
+                "email": email,
+                "connection": "Username-Password-Authentication",
+                "password": password,
+                "email_verified": True,
+            }
+        ),
+        headers={
+            "Authorization": f"Bearer {get_auth0_access_token()}",
+            "Content-Type": "application/json",
         },
-        headers={"Authorization": f"Bearer {get_auth0_access_token()}"},
     )
-    return dict(response.content)
+    return dict(response.json())
 
 
 def verify_email_address(email: str) -> None:
@@ -64,7 +70,11 @@ def verify_email_address(email: str) -> None:
 
 
 def sign_up(email: str, password: str, **kwargs) -> Dict[str, Any]:
+    result = {"message": f"Not verified email {email}"}
     creation_response = create_auth0_user(email, password)
     if not ("statusCode" in creation_response and "error" in creation_response):
         verify_email_address(email=email)
-    return {"verified": email}
+        result = {"message": email}
+    else:
+        _LOGGER.error(creation_response.get("error"))
+    return result

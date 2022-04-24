@@ -38,8 +38,8 @@ class AwsCustomClient:
                 auth_value = headers.get(cls.AUTH_HEADER_NAME)
                 token = jwt.obtain_token_from_bearer(auth_value)
                 return jwt.decode_hs256_token_no_verify(token)
-            else:
-                raise cls.NoAuthorizationHeader()
+            # else:
+            #     raise cls.NoAuthorizationHeader()
 
         @staticmethod
         def __set_username_on_repos(*repositories: Any, username: str, **kwargs):
@@ -60,12 +60,13 @@ class AwsCustomClient:
 
             actions = {cls.REPO_ACTION: cls.__set_username_on_repos}
 
-            payload = cls.__decode_header_auth_token(headers)
+            payload = cls.__decode_header_auth_token(headers) or {}
 
-            username = payload.get("%susername" % (AUTH0_CLAIMS_PREFIX))
-            username_attr = {"username": username}
-            payload.update(username_attr)
-            headers.update(username_attr)
+            if "%susername" % (AUTH0_CLAIMS_PREFIX) in payload:
+                username = payload.get("%susername" % (AUTH0_CLAIMS_PREFIX))
+                username_attr = {"username": username}
+                payload.update(username_attr)
+                headers.update(username_attr)
 
             def dummy_method(*args, **kwargs):
                 pass

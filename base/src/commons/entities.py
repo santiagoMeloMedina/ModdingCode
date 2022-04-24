@@ -23,6 +23,8 @@ from src.commons.http import HttpMethods
 class PolicyAction(enum.Enum):
     SES_SEND = "ses:SendEmail"
     SES_SEND_RAW = "ses:SendRawEmail"
+    SES_VERIFY_ADDRESS = "ses:VerifyEmailAddress"
+    SES_VERIFY_IDENTITY = "ses:VerifyEmailIdentity"
 
 
 ######################################

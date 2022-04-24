@@ -299,3 +299,15 @@ class SignUpLambda(entities.Lambda):
                 auth0_audience.env_name: auth0_audience.path,
             },
         )
+
+        self.grant_param(auth0_domain, read=True)
+        self.grant_param(auth0_client_id, read=True)
+        self.grant_param(auth0_client_secret, read=True)
+        self.grant_param(auth0_audience, read=True)
+
+        self.add_allow_policy(
+            [
+                entities.PolicyAction.SES_VERIFY_ADDRESS,
+                entities.PolicyAction.SES_VERIFY_IDENTITY,
+            ]
+        )
