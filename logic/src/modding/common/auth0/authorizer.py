@@ -113,7 +113,7 @@ def generate_policy(principal_id: str, resource: str) -> Dict[str, Any]:
                 {
                     "Action": "execute-api:Invoke",
                     "Effect": "Allow",
-                    "Resource": resource,
+                    "Resource": "*",
                 }
             ],
         },
