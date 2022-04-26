@@ -12,10 +12,11 @@ class ProblemStatus(enum.Enum):
     COMPLETED = "COMPLETED"
 
 
-class ProblemDescription(model.Model):
+class ProblemDescription(pydantic.BaseModel):
     description: Optional[str]
     sample_input: Optional[str]
     sample_output: Optional[str]
+    anything: Optional[str]
 
 
 class ProblemInputFile(model.Model):
