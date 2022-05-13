@@ -102,7 +102,24 @@ class Table(_dynamodb.Table):
 
 class Bucket(_s3.Bucket):
     def __init__(self, scope: core.Stack, id: str, entity_name: str):
-        super().__init__(scope=scope, id=id, removal_policy=core.RemovalPolicy.DESTROY)
+        super().__init__(
+            scope=scope,
+            id=id,
+            removal_policy=core.RemovalPolicy.DESTROY,
+            cors=[
+                _s3.CorsRule(
+                    allowed_headers=["*"],
+                    allowed_methods=[
+                        _s3.HttpMethods.PUT,
+                        _s3.HttpMethods.GET,
+                        _s3.HttpMethods.POST,
+                        _s3.HttpMethods.DELETE,
+                    ],
+                    allowed_origins=["*"],
+                    exposed_headers=[],
+                )
+            ],
+        )
         self.entity_name = entity_name
 
     def get_env_name_var(self) -> Dict[str, Any]:
