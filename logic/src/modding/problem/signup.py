@@ -2,6 +2,12 @@ from typing import Any, Dict
 from modding.common import http, logging, aws_cli, settings
 import requests
 import json
+import enum
+
+
+class Role(enum.Enum):
+    STUDENT = "STUDENT"
+    EXPERT = "EXPERT"
 
 
 class _Settings(settings.Settings):
@@ -9,6 +15,8 @@ class _Settings(settings.Settings):
     auth0_client_id: str
     auth0_client_secret: str
     auth0_audience: str
+    expert_role_id: str
+    student_role_id: str
 
 
 _SETTINGS = _Settings()
@@ -44,7 +52,23 @@ def get_auth0_access_token() -> str:
     return dict(response.json()).get("access_token")
 
 
-def create_auth0_user(email: str, password: str) -> Dict[str, Any]:
+def assign_auth0_user_role(email: str, role_code: str, token: str) -> Dict[str, Any]:
+    roles = {
+        Role.EXPERT: _SETTINGS.expert_role_id,
+        Role.STUDENT: _SETTINGS.student_role_id,
+    }
+    response = requests.post(
+        f"https://{_SETTINGS.auth0_domain}/api/v2/roles/{roles.get(Role(role_code), str())}/users",
+        data=json.dumps({"users": [email]}),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+    )
+    return dict(response.json())
+
+
+def create_auth0_user(email: str, password: str, token: str) -> Dict[str, Any]:
     response = requests.post(
         f"https://{_SETTINGS.auth0_domain}/api/v2/users",
         data=json.dumps(
@@ -56,7 +80,7 @@ def create_auth0_user(email: str, password: str) -> Dict[str, Any]:
             }
         ),
         headers={
-            "Authorization": f"Bearer {get_auth0_access_token()}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         },
     )
@@ -69,9 +93,11 @@ def verify_email_address(email: str) -> None:
     _LOGGER.info("Email address %s verified" % (email))
 
 
-def sign_up(email: str, password: str, **kwargs) -> Dict[str, Any]:
+def sign_up(email: str, password: str, role: str, **kwargs) -> Dict[str, Any]:
     result = {"message": f"Not verified email {email}"}
-    creation_response = create_auth0_user(email, password)
+    auth0_token = get_auth0_access_token()
+    creation_response = create_auth0_user(email, password, auth0_token)
+    assign_auth0_user_role(email, role, auth0_token)
     if not ("statusCode" in creation_response and "error" in creation_response):
         verify_email_address(email=email)
         result = {"message": email}
