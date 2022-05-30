@@ -84,6 +84,28 @@ class Auth0AudienceParam(entities.SecureStringParam):
         )
 
 
+@injector
+class Auth0ExpertRoleParam(entities.SecureStringParam):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            id="Auth0ExpertRoleParam",
+            path="/auth0/role/expert",
+            env_name="EXPERT_ROLE_ID",
+        )
+
+
+@injector
+class Auth0StudentRoleParam(entities.SecureStringParam):
+    def __init__(self, scope: stack.ProblemStack):
+        super().__init__(
+            scope=scope,
+            id="Auth0StudentRoleParam",
+            path="/auth0/role/student",
+            env_name="STUDENT_ROLE_ID",
+        )
+
+
 ### LAMBDAS ###
 
 
@@ -287,6 +309,8 @@ class SignUpLambda(entities.Lambda):
         auth0_client_id: Auth0ClientIDParam,
         auth0_client_secret: Auth0ClientSecretParam,
         auth0_audience: Auth0AudienceParam,
+        expert_role: Auth0ExpertRoleParam,
+        student_role: Auth0StudentRoleParam,
     ):
         super().__init__(
             scope=scope,
@@ -297,6 +321,8 @@ class SignUpLambda(entities.Lambda):
                 auth0_client_id.env_name: auth0_client_id.path,
                 auth0_client_secret.env_name: auth0_client_secret.path,
                 auth0_audience.env_name: auth0_audience.path,
+                expert_role.env_name: expert_role.path,
+                student_role.env_name: student_role.path,
             },
         )
 
@@ -304,6 +330,8 @@ class SignUpLambda(entities.Lambda):
         self.grant_param(auth0_client_id, read=True)
         self.grant_param(auth0_client_secret, read=True)
         self.grant_param(auth0_audience, read=True)
+        self.grant_param(expert_role, read=True)
+        self.grant_param(student_role, read=True)
 
         self.add_allow_policy(
             [

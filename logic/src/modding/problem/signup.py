@@ -58,7 +58,7 @@ def assign_auth0_user_role(email: str, role_code: str, token: str) -> Dict[str, 
         Role.STUDENT: _SETTINGS.student_role_id,
     }
     response = requests.post(
-        f"https://{_SETTINGS.auth0_domain}/api/v2/roles/{roles.get(Role(role_code), str())}/users",
+        f"https://{_SETTINGS.auth0_domain}/api/v2/roles/{roles.get(Role(role_code))}/users",
         data=json.dumps({"users": [email]}),
         headers={
             "Authorization": f"Bearer {token}",
@@ -94,13 +94,14 @@ def verify_email_address(email: str) -> None:
 
 
 def sign_up(email: str, password: str, role: str, **kwargs) -> Dict[str, Any]:
-    result = {"message": f"Not verified email {email}"}
-    auth0_token = get_auth0_access_token()
-    creation_response = create_auth0_user(email, password, auth0_token)
-    assign_auth0_user_role(email, role, auth0_token)
-    if not ("statusCode" in creation_response and "error" in creation_response):
-        verify_email_address(email=email)
-        result = {"message": email}
-    else:
-        _LOGGER.error(creation_response.get("error"))
+    result = {"message": f"Could not signup {email}"}
+    if email and password and role:
+        auth0_token = get_auth0_access_token()
+        creation_response = create_auth0_user(email, password, auth0_token)
+        assign_auth0_user_role(creation_response.get("user_id"), role, auth0_token)
+        if not ("statusCode" in creation_response and "error" in creation_response):
+            verify_email_address(email=email)
+            result = {"message": email}
+        else:
+            _LOGGER.error(creation_response.get("error"))
     return result
