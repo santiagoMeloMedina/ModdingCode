@@ -54,19 +54,31 @@ def handler(event: aws_client.ApiGateway.AGWEvent, context: Dict[str, Any]) -> A
 
 
 def build_and_get_upload_url(
-    name: str, ext: str, category_id: str, id: str
+    name: str, ext: str, category_id: str, description: str, id: str
 ) -> models.Minicourse:
     ext = files.clean_extension(ext)
-    minicourse = models.Minicourse(id=id, name=name, category_id=category_id, ext=ext)
+    minicourse = models.Minicourse(
+        id=id, name=name, category_id=category_id, ext=ext, description=description
+    )
     return minicourse
 
 
-def build_minicourse(name: str, category_id: str, ext: str) -> models.Minicourse:
+def build_minicourse(
+    name: str, category_id: str, description: str, ext: str
+) -> models.Minicourse:
     return id_generator.retrier_with_generator(
         category_id,
         MINICOURSE_ID_LENGTH,
         func=build_and_get_upload_url,
-        params=([], {"name": name, "ext": ext, "category_id": category_id}),
+        params=(
+            [],
+            {
+                "name": name,
+                "ext": ext,
+                "category_id": category_id,
+                "description": description,
+            },
+        ),
         tries=MAX_NUMBER_TRIES,
         logging_method=_LOGGER.warning,
         failed_message="Minicourse could not be built",
@@ -82,10 +94,10 @@ def obtain_upload_url(minicourse: models.Minicourse) -> str:
 
 
 def create_minicourse(
-    name: str, category_id: str, ext: str, **kwargs
+    name: str, category_id: str, description: str, ext: str, **kwargs
 ) -> Tuple[models.Minicourse, str]:
     category: models.Category = CATEGORY_REPOSITORY.get_item_by_id(category_id)
-    minicourse = build_minicourse(name, category.id, ext)
+    minicourse = build_minicourse(name, category.id, description, ext)
     if minicourse is not None:
         MINICOURSE_REPOSITORY.save_on_table(minicourse)
         thumb_upload_url = obtain_upload_url(minicourse)

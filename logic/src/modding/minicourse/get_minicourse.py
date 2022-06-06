@@ -92,11 +92,21 @@ def get_minicourses_by_username(**kwargs) -> Dict[str, Any]:
 
 def get_minicourses_by_category(category_id: str, **kwargs) -> Dict[str, Any]:
     ### TODO(Santiago): Add randomness and pagination
+    result = []
     minicourses = MINICOURSE_REPOSITORY.query_items(
         {"category_id": category_id},
         index_name=_SETTINGS.minicourse_category_index_name,
     )
-    return {"minicourses": [minicourse.dict() for minicourse in minicourses]}
+    for minicourse in minicourses:
+        object_name = f"{minicourse.id}.{files.clean_extension(minicourse.ext)}"
+        thumb_download_url = MINICOURSE_REPOSITORY.thumb_get_presigned_url(
+            object_name, int(_SETTINGS.thumb_download_expire_time)
+        )
+        result.append({
+            **minicourse.dict(), 
+            "thumb_download_url": thumb_download_url
+        })
+    return {"minicourses": result}
 
 
 def actions(action: str, params: Dict[str, Any], **kwargs) -> Dict[str, Any]:

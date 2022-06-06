@@ -12,3 +12,4 @@ class Minicourse(model.Model):
     name: str
     ext: str
     rate: Optional[int]
+    description: str = str()
