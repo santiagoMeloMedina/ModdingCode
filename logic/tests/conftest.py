@@ -3,6 +3,8 @@ import pytest
 import os
 import sys
 
+path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, f"{path}/src/")
 
 def naive_check_mark_exist(request, mark):
     marks = [m.name for m in request.node.iter_markers()]
